@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "apollo-server-express": "^3.13.0",
+    "bcrypt": "^6.0.0",
+    "graphql": "^16.13.2",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.3.3"
+  }
+}

@@ -25,7 +25,7 @@ const Footer: React.FC = () => {
         {/* Copy / Legal */}
         <div className="flex flex-row justify-between items-center pt-4">
           <p className="text-neutral-500 text-xs">&copy; {new Date().getFullYear()} Diamond Data LLC.</p>
-          <p className="text-neutral-500 text-xs">Created by Dwayne Burns and Frank Spitzock</p>
+          <p className="text-neutral-500 text-xs">Created by Frank Spitzock</p>
           <p className="text-neutral-500 text-xs">All rights reserved.</p>
         </div>
       </div>

@@ -9,24 +9,26 @@ import Header from "./components/Layout/Header";
 import Footer from "./components/Layout/Footer";
 import '../src/App.css';
 
+const client = new ApolloClient({
+  uri: "http://localhost:4000/graphql", // your Apollo Server URL
+  cache: new InMemoryCache(),
+});
 
 const App: React.FC = () => {
   return (
-    <>
-    <BrowserRouter basename="/">
-    <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/Stats" element={<Stats />} />
-        <Route path="/BaseballAI" element={<BaseballAI />} />
-        <Route path="/BaseballCard" element={<BaseballCard />} />
-        {/* 🧭 404 Catch-All Route */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-
-      <Footer />
-    </BrowserRouter>
-    </>
+    <ApolloProvider client={client}> {/* Step 2: Wrap app in ApolloProvider */}
+      <BrowserRouter basename="/">
+        <Header />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/Stats" element={<Stats />} />
+          <Route path="/BaseballAI" element={<BaseballAI />} />
+          <Route path="/BaseballCard" element={<BaseballCard />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Footer />
+      </BrowserRouter>
+    </ApolloProvider>
   );
 };
 
