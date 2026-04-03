@@ -1,0 +1,23 @@
+import { PlayerPosition } from './position';
+import { GameStats } from './game';
+
+export interface Player {
+  id: number;
+  firstName: string;
+  lastName: string;
+  height: string;
+  weight: number;
+  image: string;
+  position: PlayerPosition;
+  birthDate: string;
+  team: string;
+  totalStats: PlayerGame[] | null;
+}
+
+export type PlayerGame = {
+  gameId: number;
+  date: string;
+  team1: string;
+  team2: string;
+  stats: GameStats;
+}
