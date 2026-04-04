@@ -88,7 +88,9 @@ const initialGameStats: GameStats = {
 };
 
 const GameStatsForm: React.FC = () => {
-  const [gameStats, setGameStats] = useState<GameStats>({ ...initialGameStats });
+  const [gameStats, setGameStats] = useState<GameStats>({
+    ...initialGameStats,
+  });
 
   const [playerGame, setPlayerGame] = useState<PlayerGame>({
     gameId: Date.now(),
@@ -104,9 +106,9 @@ const GameStatsForm: React.FC = () => {
   }>(null);
 
   const [addPlayerGame] = useMutation(ADD_PLAYER_GAME, {
-  refetchQueries: [{ query: GET_PLAYER_GAMES }],
-  awaitRefetchQueries: true,
-});
+    refetchQueries: [{ query: GET_PLAYER_GAMES }],
+    awaitRefetchQueries: true,
+  });
 
   useEffect(() => {
     setPlayerGame((pg) => ({ ...pg, stats: gameStats }));
@@ -114,7 +116,7 @@ const GameStatsForm: React.FC = () => {
 
   const saveToBackend = async () => {
     try {
-      const { data } = await addPlayerGame({
+      await addPlayerGame({
         variables: {
           team1: playerGame.team1,
           team2: playerGame.team2,
@@ -129,8 +131,6 @@ const GameStatsForm: React.FC = () => {
           strikeOuts: gameStats.strikeOuts,
         },
       });
-
-      console.log("Saved game:", data?.addPlayerGame);
 
       setNotification({
         message: "💾 Saved new game!",
