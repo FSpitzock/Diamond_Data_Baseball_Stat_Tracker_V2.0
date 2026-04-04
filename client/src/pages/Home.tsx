@@ -32,7 +32,7 @@ type PlayerGameRecord = {
 };
 
 const GET_PLAYER_GAMES = gql`
-  query {
+  query GetPlayerGames {
     playerGames {
       gameId
       team2
