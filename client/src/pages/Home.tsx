@@ -1,5 +1,6 @@
-import TestApollo from "../components/TestApollo";
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { gql } from "@apollo/client";
+import { useQuery } from "@apollo/client/react";
 import {
   Table,
   TableHeader,
@@ -9,12 +10,10 @@ import {
   TableCell,
   TableCaption,
 } from "../components/ui/table";
-import { Player } from "../types/player";
-import PlayerDetails, { DemoPlayerDetails } from "@/components/ui/playerDetails";
+import { DemoPlayerDetails } from "@/components/ui/playerDetails";
 import StatsCard from "@/components/ui/statsCard";
 
-
-type GameStats = {
+type StatValues = {
   atBats: number;
   hits: number;
   singles: number;
@@ -24,13 +23,40 @@ type GameStats = {
   rbi: number;
   walks: number;
   strikeOuts: number;
-  savedAt?: string;
 };
 
-const StatsPage: React.FC = () => {
-  const [statsArray, setStatsArray] = useState<GameStats[]>([]);
+type PlayerGameRecord = {
+  gameId: string;
+  team2?: string;
+  stats: StatValues;
+};
 
-  const labels: { key: Exclude<keyof GameStats, "savedAt">; label: string }[] = [
+const GET_PLAYER_GAMES = gql`
+  query {
+    playerGames {
+      gameId
+      team2
+      stats {
+        atBats
+        hits
+        singles
+        doubles
+        triples
+        homeRuns
+        rbi
+        walks
+        strikeOuts
+      }
+    }
+  }
+`;
+
+const Home: React.FC = () => {
+  const { loading, error, data } = useQuery(GET_PLAYER_GAMES);
+
+  const statsArray: PlayerGameRecord[] = data?.playerGames ?? [];
+
+  const labels: { key: keyof StatValues; label: string }[] = [
     { key: "atBats", label: "At Bats" },
     { key: "hits", label: "Hits" },
     { key: "singles", label: "Singles" },
@@ -42,47 +68,43 @@ const StatsPage: React.FC = () => {
     { key: "strikeOuts", label: "Strike Outs" },
   ];
 
-  // batting avg = hits/at bats
   const battingAvg = (hits: number, atBats: number) => {
-    if (atBats === 0) return 0;
+    if (atBats === 0) return "0.000";
     return (hits / atBats).toFixed(3);
   };
 
-  // LOAD SAVED STATS FROM LOCAL STORAGE
-  useEffect(() => {
-    const saved = localStorage.getItem("playerGames");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        setStatsArray(Array.isArray(parsed) ? parsed : [parsed]);
-      } catch (error) {
-        console.error("Failed to parse saved stats:", error);
-        setStatsArray([]);
-      }
-    }
-  }, []);
+  if (loading) {
+    return <p className="p-6 text-xl">Loading stats...</p>;
+  }
+
+  if (error) {
+    console.error("Failed to load stats:", error);
+    return <p className="p-6 text-xl">Error loading stats.</p>;
+  }
 
   if (!statsArray.length) {
     return <p className="p-6 text-xl">No saved stats yet.</p>;
   }
 
-  // CALCULATE TOTALS
   const totals = labels.reduce((acc, item) => {
-    acc[item.key] = statsArray.reduce((sum, stat) => sum + (stat.stats[item.key] || 0), 0);
+    acc[item.key] = statsArray.reduce(
+      (sum, stat) => sum + (stat.stats?.[item.key] || 0),
+      0
+    );
     return acc;
-  }, {} as Record<Exclude<keyof GameStats, "savedAt">, number>);
+  }, {} as Record<keyof StatValues, number>);
 
   return (
     <section className="flex flex-col gap-8">
-        {/* ✅ TEMP TEST - REMOVE LATER */}
-    <TestApollo />
-
-  
       <DemoPlayerDetails />
+
       <div className="flex flex-row mx-auto w-full gap-4 justify-between">
         <StatsCard label={labels[0].label} value={totals[labels[0].key]} />
         <StatsCard label={labels[1].label} value={totals[labels[1].key]} />
-        <StatsCard label="Batting Avg" value={battingAvg(totals.hits, totals.atBats)} />
+        <StatsCard
+          label="Batting Avg"
+          value={battingAvg(totals.hits, totals.atBats)}
+        />
       </div>
 
       <Table>
@@ -97,11 +119,9 @@ const StatsPage: React.FC = () => {
         </TableHeader>
 
         <TableBody>
-          {statsArray.map((stat, index) => (
-            <TableRow key={index}>
-              <TableCell>
-                {stat.team2 || "-"}
-              </TableCell>
+          {statsArray.map((stat) => (
+            <TableRow key={stat.gameId}>
+              <TableCell>{stat.team2 || "-"}</TableCell>
 
               {labels.map((item) => (
                 <TableCell key={item.key}>{stat.stats[item.key]}</TableCell>
@@ -109,7 +129,6 @@ const StatsPage: React.FC = () => {
             </TableRow>
           ))}
 
-          {/* ✅ TOTALS ROW */}
           <TableRow className="font-bold bg-gray-100">
             <TableCell>Totals</TableCell>
             {labels.map((item) => (
@@ -122,4 +141,4 @@ const StatsPage: React.FC = () => {
   );
 };
 
-export default StatsPage;
+export default Home;
