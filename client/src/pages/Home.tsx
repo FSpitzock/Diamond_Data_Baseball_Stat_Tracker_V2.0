@@ -1,3 +1,4 @@
+import TestApollo from "../components/TestApollo";
 import React, { useEffect, useState } from "react";
 import {
   Table,
@@ -11,6 +12,7 @@ import {
 import { Player } from "../types/player";
 import PlayerDetails, { DemoPlayerDetails } from "@/components/ui/playerDetails";
 import StatsCard from "@/components/ui/statsCard";
+
 
 type GameStats = {
   atBats: number;
@@ -72,6 +74,10 @@ const StatsPage: React.FC = () => {
 
   return (
     <section className="flex flex-col gap-8">
+        {/* ✅ TEMP TEST - REMOVE LATER */}
+    <TestApollo />
+
+  
       <DemoPlayerDetails />
       <div className="flex flex-row mx-auto w-full gap-4 justify-between">
         <StatsCard label={labels[0].label} value={totals[labels[0].key]} />

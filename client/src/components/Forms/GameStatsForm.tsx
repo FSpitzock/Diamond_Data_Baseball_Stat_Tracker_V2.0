@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { GameStats } from '../../types/game';
 import { PlayerGame } from '../../types/player';
 import { PlusIcon, MinusIcon, ArrowCounterClockwiseIcon  } from '@phosphor-icons/react';
+// import { useMutation } from "@apollo/client/react"; (use when we remove local storage and connect to backend)
 
 const initialGameStats: GameStats = {
   atBats: 0,

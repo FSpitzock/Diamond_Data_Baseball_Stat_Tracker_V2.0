@@ -8,9 +8,13 @@ import NotFound from "./pages/NotFound";
 import Header from "./components/Layout/Header";
 import Footer from "./components/Layout/Footer";
 import '../src/App.css';
+import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
+import { ApolloProvider } from "@apollo/client/react";
 
 const client = new ApolloClient({
-  uri: "http://localhost:4000/graphql", // your Apollo Server URL
+  link: new HttpLink({
+    uri: "http://localhost:4000/graphql",
+  }),
   cache: new InMemoryCache(),
 });
 
