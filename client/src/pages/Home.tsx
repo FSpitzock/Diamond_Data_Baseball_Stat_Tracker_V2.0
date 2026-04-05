@@ -12,6 +12,7 @@ import {
 } from "../components/ui/table";
 import { DemoPlayerDetails } from "@/components/ui/playerDetails";
 import StatsCard from "@/components/ui/statsCard";
+import AddPlayerForm from "../components/Forms/AddPlayerForm";
 
 type StatValues = {
   atBats: number;
@@ -64,6 +65,7 @@ const Home: React.FC = () => {
     refetchQueries: [{ query: GET_PLAYER_GAMES }],
     awaitRefetchQueries: true,
   });
+
   const { loading, error, data } = useQuery(GET_PLAYER_GAMES, {
     fetchPolicy: "cache-and-network",
   });
@@ -104,31 +106,47 @@ const Home: React.FC = () => {
   };
 
   if (loading) {
-    return <p className="p-6 text-xl">Loading stats...</p>;
+    return (
+      <section className="flex flex-col gap-8">
+        <AddPlayerForm />
+        <p className="p-6 text-xl">Loading stats...</p>
+      </section>
+    );
   }
 
   if (error) {
     console.error("Failed to load stats:", error);
-    return <p className="p-6 text-xl">Error loading stats.</p>;
+    return (
+      <section className="flex flex-col gap-8">
+        <AddPlayerForm />
+        <p className="p-6 text-xl">Error loading stats.</p>
+      </section>
+    );
   }
 
   if (!statsArray.length) {
-    return <p className="p-6 text-xl">No saved stats yet.</p>;
+    return (
+      <section className="flex flex-col gap-8">
+        <AddPlayerForm />
+        <p className="p-6 text-xl">No saved stats yet.</p>
+      </section>
+    );
   }
 
   const totals = labels.reduce(
     (acc, item) => {
       acc[item.key] = statsArray.reduce(
         (sum, stat) => sum + (stat.stats?.[item.key] || 0),
-        0,
+        0
       );
       return acc;
     },
-    {} as Record<keyof StatValues, number>,
+    {} as Record<keyof StatValues, number>
   );
 
   return (
     <section className="flex flex-col gap-8">
+      <AddPlayerForm />
       <DemoPlayerDetails />
 
       <div className="flex flex-row mx-auto w-full gap-4 justify-between">
