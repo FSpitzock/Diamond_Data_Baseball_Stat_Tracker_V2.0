@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { gql } from "@apollo/client";
-import { useMutation } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 import { GameStats } from "../../types/game";
 import { PlayerGame } from "../../types/player";
 import {
@@ -13,6 +13,7 @@ const GET_PLAYER_GAMES = gql`
   query GetPlayerGames {
     playerGames {
       gameId
+      playerId
       team2
       stats {
         atBats
@@ -29,8 +30,20 @@ const GET_PLAYER_GAMES = gql`
   }
 `;
 
+const GET_PLAYERS = gql`
+  query GetPlayers {
+    players {
+      playerId
+      name
+      number
+      position
+    }
+  }
+`;
+
 const ADD_PLAYER_GAME = gql`
   mutation AddPlayerGame(
+    $playerId: ID!
     $team1: String
     $team2: String
     $atBats: Int
@@ -44,6 +57,7 @@ const ADD_PLAYER_GAME = gql`
     $strikeOuts: Int
   ) {
     addPlayerGame(
+      playerId: $playerId
       team1: $team1
       team2: $team2
       atBats: $atBats
@@ -57,6 +71,7 @@ const ADD_PLAYER_GAME = gql`
       strikeOuts: $strikeOuts
     ) {
       gameId
+      playerId
       date
       team1
       team2
@@ -87,6 +102,18 @@ const initialGameStats: GameStats = {
   strikeOuts: 0,
 };
 
+type Notification = {
+  message: string;
+  type: "success" | "error";
+};
+
+type PlayerOption = {
+  playerId: string;
+  name: string;
+  number?: number | null;
+  position?: string | null;
+};
+
 const GameStatsForm: React.FC = () => {
   const [gameStats, setGameStats] = useState<GameStats>({
     ...initialGameStats,
@@ -100,24 +127,38 @@ const GameStatsForm: React.FC = () => {
     stats: { ...initialGameStats },
   });
 
-  const [notification, setNotification] = useState<null | {
-    message: string;
-    type: "success" | "error";
-  }>(null);
+  const [selectedPlayerId, setSelectedPlayerId] = useState("");
+  const [notification, setNotification] = useState<Notification | null>(null);
+
+  const { data: playersData, loading: playersLoading } = useQuery(GET_PLAYERS, {
+    fetchPolicy: "cache-and-network",
+  });
 
   const [addPlayerGame] = useMutation(ADD_PLAYER_GAME, {
     refetchQueries: [{ query: GET_PLAYER_GAMES }],
     awaitRefetchQueries: true,
   });
 
+  const players: PlayerOption[] = playersData?.players ?? [];
+
   useEffect(() => {
     setPlayerGame((pg) => ({ ...pg, stats: gameStats }));
   }, [gameStats]);
 
   const saveToBackend = async () => {
+    if (!selectedPlayerId) {
+      setNotification({
+        message: "Please select a player first.",
+        type: "error",
+      });
+      setTimeout(() => setNotification(null), 3000);
+      return;
+    }
+
     try {
       await addPlayerGame({
         variables: {
+          playerId: selectedPlayerId,
           team1: playerGame.team1,
           team2: playerGame.team2,
           atBats: gameStats.atBats,
@@ -137,6 +178,7 @@ const GameStatsForm: React.FC = () => {
         type: "success",
       });
 
+      setSelectedPlayerId("");
       setGameStats({ ...initialGameStats });
       setPlayerGame({
         gameId: Date.now(),
@@ -164,9 +206,29 @@ const GameStatsForm: React.FC = () => {
       <header>
         <h1>Game Stats</h1>
         <p className="text-sm text-neutral-500">
-          Enter the stats for today's game.
+          Select a player and enter stats for today's game.
         </p>
       </header>
+
+      <div>
+        <select
+          className="items-stretch w-full"
+          value={selectedPlayerId}
+          onChange={(e) => setSelectedPlayerId(e.target.value)}
+          disabled={playersLoading}
+        >
+          <option value="">
+            {playersLoading ? "Loading players..." : "Select Player"}
+          </option>
+          {players.map((player) => (
+            <option key={player.playerId} value={player.playerId}>
+              {player.name}
+              {player.number ? ` #${player.number}` : ""}
+              {player.position ? ` - ${player.position}` : ""}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div>
         <input
@@ -186,6 +248,7 @@ const GameStatsForm: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({
@@ -198,6 +261,7 @@ const GameStatsForm: React.FC = () => {
           </button>
           <span className="statInput">{gameStats.atBats}</span>
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({ ...gameStats, atBats: gameStats.atBats + 1 })
@@ -206,6 +270,7 @@ const GameStatsForm: React.FC = () => {
             <PlusIcon size={24} />
           </button>
           <button
+            type="button"
             className="iconButton-destructive"
             onClick={() => setGameStats({ ...gameStats, atBats: 0 })}
           >
@@ -220,6 +285,7 @@ const GameStatsForm: React.FC = () => {
         </div>
         <div className="flex row items-center gap-2">
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({
@@ -232,6 +298,7 @@ const GameStatsForm: React.FC = () => {
           </button>
           <span className="statInput">{gameStats.hits}</span>
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({ ...gameStats, hits: gameStats.hits + 1 })
@@ -240,6 +307,7 @@ const GameStatsForm: React.FC = () => {
             <PlusIcon size={24} />
           </button>
           <button
+            type="button"
             className="iconButton-destructive"
             onClick={() => setGameStats({ ...gameStats, hits: 0 })}
           >
@@ -254,6 +322,7 @@ const GameStatsForm: React.FC = () => {
         </div>
         <div className="flex row items-center gap-2">
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({
@@ -266,6 +335,7 @@ const GameStatsForm: React.FC = () => {
           </button>
           <span className="statInput">{gameStats.singles}</span>
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({ ...gameStats, singles: gameStats.singles + 1 })
@@ -274,6 +344,7 @@ const GameStatsForm: React.FC = () => {
             <PlusIcon size={24} />
           </button>
           <button
+            type="button"
             className="iconButton-destructive"
             onClick={() => setGameStats({ ...gameStats, singles: 0 })}
           >
@@ -288,6 +359,7 @@ const GameStatsForm: React.FC = () => {
         </div>
         <div className="flex row items-center gap-2">
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({
@@ -300,6 +372,7 @@ const GameStatsForm: React.FC = () => {
           </button>
           <span className="statInput">{gameStats.doubles}</span>
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({ ...gameStats, doubles: gameStats.doubles + 1 })
@@ -308,6 +381,7 @@ const GameStatsForm: React.FC = () => {
             <PlusIcon size={24} />
           </button>
           <button
+            type="button"
             className="iconButton-destructive"
             onClick={() => setGameStats({ ...gameStats, doubles: 0 })}
           >
@@ -322,6 +396,7 @@ const GameStatsForm: React.FC = () => {
         </div>
         <div className="flex row items-center gap-2">
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({
@@ -334,6 +409,7 @@ const GameStatsForm: React.FC = () => {
           </button>
           <span className="statInput">{gameStats.triples}</span>
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({ ...gameStats, triples: gameStats.triples + 1 })
@@ -342,6 +418,7 @@ const GameStatsForm: React.FC = () => {
             <PlusIcon size={24} />
           </button>
           <button
+            type="button"
             className="iconButton-destructive"
             onClick={() => setGameStats({ ...gameStats, triples: 0 })}
           >
@@ -356,6 +433,7 @@ const GameStatsForm: React.FC = () => {
         </div>
         <div className="flex row items-center gap-2">
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({
@@ -368,6 +446,7 @@ const GameStatsForm: React.FC = () => {
           </button>
           <span className="statInput">{gameStats.homeRuns}</span>
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({ ...gameStats, homeRuns: gameStats.homeRuns + 1 })
@@ -376,6 +455,7 @@ const GameStatsForm: React.FC = () => {
             <PlusIcon size={24} />
           </button>
           <button
+            type="button"
             className="iconButton-destructive"
             onClick={() => setGameStats({ ...gameStats, homeRuns: 0 })}
           >
@@ -390,6 +470,7 @@ const GameStatsForm: React.FC = () => {
         </div>
         <div className="flex row items-center gap-2">
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({
@@ -402,6 +483,7 @@ const GameStatsForm: React.FC = () => {
           </button>
           <span className="statInput">{gameStats.rbi}</span>
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({ ...gameStats, rbi: gameStats.rbi + 1 })
@@ -410,6 +492,7 @@ const GameStatsForm: React.FC = () => {
             <PlusIcon size={24} />
           </button>
           <button
+            type="button"
             className="iconButton-destructive"
             onClick={() => setGameStats({ ...gameStats, rbi: 0 })}
           >
@@ -424,6 +507,7 @@ const GameStatsForm: React.FC = () => {
         </div>
         <div className="flex row items-center gap-2">
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({
@@ -436,6 +520,7 @@ const GameStatsForm: React.FC = () => {
           </button>
           <span className="statInput">{gameStats.walks}</span>
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({ ...gameStats, walks: gameStats.walks + 1 })
@@ -444,6 +529,7 @@ const GameStatsForm: React.FC = () => {
             <PlusIcon size={24} />
           </button>
           <button
+            type="button"
             className="iconButton-destructive"
             onClick={() => setGameStats({ ...gameStats, walks: 0 })}
           >
@@ -458,6 +544,7 @@ const GameStatsForm: React.FC = () => {
         </div>
         <div className="flex row items-center gap-2">
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({
@@ -470,6 +557,7 @@ const GameStatsForm: React.FC = () => {
           </button>
           <span className="statInput">{gameStats.strikeOuts}</span>
           <button
+            type="button"
             className="iconButton"
             onClick={() =>
               setGameStats({
@@ -481,6 +569,7 @@ const GameStatsForm: React.FC = () => {
             <PlusIcon size={24} />
           </button>
           <button
+            type="button"
             className="iconButton-destructive"
             onClick={() => setGameStats({ ...gameStats, strikeOuts: 0 })}
           >
