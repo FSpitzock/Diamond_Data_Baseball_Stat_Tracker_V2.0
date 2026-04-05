@@ -29,6 +29,12 @@ type StatValues = {
 type PlayerGameRecord = {
   gameId: string;
   team2?: string;
+  player?: {
+    playerId: string;
+    name: string;
+    number?: number | null;
+    position?: string | null;
+  };
   stats: StatValues;
 };
 
@@ -37,6 +43,12 @@ const GET_PLAYER_GAMES = gql`
     playerGames {
       gameId
       team2
+      player {
+        playerId
+        name
+        number
+        position
+      }
       stats {
         atBats
         hits
@@ -162,6 +174,7 @@ const Home: React.FC = () => {
         <TableCaption>Your saved baseball stats</TableCaption>
         <TableHeader>
           <TableRow>
+            <TableHead>Player</TableHead>
             <TableHead>Opponent</TableHead>
             {labels.map((item) => (
               <TableHead key={item.key}>{item.label}</TableHead>
@@ -173,6 +186,7 @@ const Home: React.FC = () => {
         <TableBody>
           {statsArray.map((stat) => (
             <TableRow key={stat.gameId}>
+              <TableCell>{stat.player?.name || "-"}</TableCell>
               <TableCell>{stat.team2 || "-"}</TableCell>
 
               {labels.map((item) => (
@@ -191,6 +205,7 @@ const Home: React.FC = () => {
           ))}
 
           <TableRow className="font-bold bg-gray-100">
+            <TableCell></TableCell>
             <TableCell>Totals</TableCell>
             {labels.map((item) => (
               <TableCell key={item.key}>{totals[item.key]}</TableCell>

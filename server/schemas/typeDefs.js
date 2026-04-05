@@ -24,11 +24,12 @@ const typeDefs = gql`
   type PlayerGame {
     gameId: ID!
     playerId: ID!
+    player: Player
     date: String
     team1: String
     team2: String
     stats: GameStats
-  }
+    }
 
   type Query {
     players: [Player]

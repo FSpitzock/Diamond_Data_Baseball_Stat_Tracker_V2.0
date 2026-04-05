@@ -22,6 +22,11 @@ const resolvers = {
       playerGames.filter((g) => g.playerId === parent.playerId),
   },
 
+  PlayerGame: {
+    player: (parent) =>
+        players.find((p) => p.playerId === parent.playerId),
+},
+
   Mutation: {
     addPlayer: (_, args) => {
       const newPlayer = {
