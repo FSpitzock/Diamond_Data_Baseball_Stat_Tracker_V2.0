@@ -1,6 +1,6 @@
 import React from "react";
 import { gql } from "@apollo/client";
-import { useQuery } from "@apollo/client/react";
+import { useQuery, useMutation } from "@apollo/client/react";
 import {
   Table,
   TableHeader,
@@ -51,8 +51,22 @@ const GET_PLAYER_GAMES = gql`
   }
 `;
 
+const DELETE_PLAYER_GAME = gql`
+  mutation DeletePlayerGame($gameId: ID!) {
+    deletePlayerGame(gameId: $gameId) {
+      gameId
+    }
+  }
+`;
+
 const Home: React.FC = () => {
-  const { loading, error, data } = useQuery(GET_PLAYER_GAMES);
+  const [deletePlayerGame] = useMutation(DELETE_PLAYER_GAME, {
+    refetchQueries: [{ query: GET_PLAYER_GAMES }],
+    awaitRefetchQueries: true,
+  });
+  const { loading, error, data } = useQuery(GET_PLAYER_GAMES, {
+    fetchPolicy: "cache-and-network",
+  });
 
   const statsArray: PlayerGameRecord[] = data?.playerGames ?? [];
 
@@ -67,6 +81,22 @@ const Home: React.FC = () => {
     { key: "walks", label: "Walks" },
     { key: "strikeOuts", label: "Strike Outs" },
   ];
+
+  const handleDelete = async (gameId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this game?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deletePlayerGame({
+        variables: { gameId },
+      });
+    } catch (error) {
+      console.error("Failed to delete game:", error);
+    }
+  };
 
   const battingAvg = (hits: number, atBats: number) => {
     if (atBats === 0) return "0.000";
@@ -86,13 +116,16 @@ const Home: React.FC = () => {
     return <p className="p-6 text-xl">No saved stats yet.</p>;
   }
 
-  const totals = labels.reduce((acc, item) => {
-    acc[item.key] = statsArray.reduce(
-      (sum, stat) => sum + (stat.stats?.[item.key] || 0),
-      0
-    );
-    return acc;
-  }, {} as Record<keyof StatValues, number>);
+  const totals = labels.reduce(
+    (acc, item) => {
+      acc[item.key] = statsArray.reduce(
+        (sum, stat) => sum + (stat.stats?.[item.key] || 0),
+        0,
+      );
+      return acc;
+    },
+    {} as Record<keyof StatValues, number>,
+  );
 
   return (
     <section className="flex flex-col gap-8">
@@ -115,6 +148,7 @@ const Home: React.FC = () => {
             {labels.map((item) => (
               <TableHead key={item.key}>{item.label}</TableHead>
             ))}
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
 
@@ -126,6 +160,15 @@ const Home: React.FC = () => {
               {labels.map((item) => (
                 <TableCell key={item.key}>{stat.stats[item.key]}</TableCell>
               ))}
+
+              <TableCell>
+                <button
+                  className="iconButton-destructive"
+                  onClick={() => handleDelete(stat.gameId)}
+                >
+                  Delete
+                </button>
+              </TableCell>
             </TableRow>
           ))}
 
@@ -134,6 +177,7 @@ const Home: React.FC = () => {
             {labels.map((item) => (
               <TableCell key={item.key}>{totals[item.key]}</TableCell>
             ))}
+            <TableCell></TableCell>
           </TableRow>
         </TableBody>
       </Table>

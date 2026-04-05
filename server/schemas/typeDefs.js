@@ -13,8 +13,17 @@ const typeDefs = gql`
     strikeOuts: Int
   }
 
+  type Player {
+    playerId: ID!
+    name: String!
+    number: Int
+    position: String
+    games: [PlayerGame]
+  }
+
   type PlayerGame {
     gameId: ID!
+    playerId: ID!
     date: String
     team1: String
     team2: String
@@ -22,12 +31,22 @@ const typeDefs = gql`
   }
 
   type Query {
+    players: [Player]
+    player(playerId: ID!): Player
     playerGames: [PlayerGame]
     playerGame(gameId: ID!): PlayerGame
+    playerGamesByPlayer(playerId: ID!): [PlayerGame]
   }
 
   type Mutation {
+    addPlayer(
+      name: String!
+      number: Int
+      position: String
+    ): Player
+
     addPlayerGame(
+      playerId: ID!
       team1: String
       team2: String
       atBats: Int
@@ -41,6 +60,7 @@ const typeDefs = gql`
       strikeOuts: Int
     ): PlayerGame
 
+    deletePlayer(playerId: ID!): Player
     deletePlayerGame(gameId: ID!): PlayerGame
   }
 `;
