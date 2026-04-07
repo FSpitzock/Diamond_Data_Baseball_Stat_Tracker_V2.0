@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
 import {
@@ -10,7 +10,6 @@ import {
   TableCell,
   TableCaption,
 } from "../components/ui/table";
-import { DemoPlayerDetails } from "@/components/ui/playerDetails";
 import StatsCard from "@/components/ui/statsCard";
 import AddPlayerForm from "../components/Forms/AddPlayerForm";
 
@@ -26,6 +25,14 @@ type StatValues = {
   strikeOuts: number;
 };
 
+type PlayerRecord = {
+  playerId: string;
+  name: string;
+  number?: number | null;
+  position?: string | null;
+  games?: { gameId: string }[];
+};
+
 type PlayerGameRecord = {
   gameId: string;
   team2?: string;
@@ -38,8 +45,18 @@ type PlayerGameRecord = {
   stats: StatValues;
 };
 
-const GET_PLAYER_GAMES = gql`
-  query GetPlayerGames {
+const GET_HOME_DATA = gql`
+  query GetHomeData {
+    players {
+      playerId
+      name
+      number
+      position
+      games {
+        gameId
+      }
+    }
+
     playerGames {
       gameId
       team2
@@ -73,16 +90,30 @@ const DELETE_PLAYER_GAME = gql`
 `;
 
 const Home: React.FC = () => {
+  const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
+
   const [deletePlayerGame] = useMutation(DELETE_PLAYER_GAME, {
-    refetchQueries: [{ query: GET_PLAYER_GAMES }],
+    refetchQueries: [{ query: GET_HOME_DATA }],
     awaitRefetchQueries: true,
   });
 
-  const { loading, error, data } = useQuery(GET_PLAYER_GAMES, {
+  const { loading, error, data } = useQuery(GET_HOME_DATA, {
     fetchPolicy: "cache-and-network",
   });
 
-  const statsArray: PlayerGameRecord[] = data?.playerGames ?? [];
+  const players: PlayerRecord[] = data?.players ?? [];
+  const allGames: PlayerGameRecord[] = data?.playerGames ?? [];
+
+  const selectedPlayer = players.find(
+    (player) => player.playerId === selectedPlayerId
+  );
+
+  const statsArray: PlayerGameRecord[] = useMemo(() => {
+    if (!selectedPlayerId) return allGames;
+    return allGames.filter(
+      (game) => game.player?.playerId === selectedPlayerId
+    );
+  }, [allGames, selectedPlayerId]);
 
   const labels: { key: keyof StatValues; label: string }[] = [
     { key: "atBats", label: "At Bats" },
@@ -117,34 +148,6 @@ const Home: React.FC = () => {
     return (hits / atBats).toFixed(3);
   };
 
-  if (loading) {
-    return (
-      <section className="flex flex-col gap-8">
-        <AddPlayerForm />
-        <p className="p-6 text-xl">Loading stats...</p>
-      </section>
-    );
-  }
-
-  if (error) {
-    console.error("Failed to load stats:", error);
-    return (
-      <section className="flex flex-col gap-8">
-        <AddPlayerForm />
-        <p className="p-6 text-xl">Error loading stats.</p>
-      </section>
-    );
-  }
-
-  if (!statsArray.length) {
-    return (
-      <section className="flex flex-col gap-8">
-        <AddPlayerForm />
-        <p className="p-6 text-xl">No saved stats yet.</p>
-      </section>
-    );
-  }
-
   const totals = labels.reduce(
     (acc, item) => {
       acc[item.key] = statsArray.reduce(
@@ -156,64 +159,192 @@ const Home: React.FC = () => {
     {} as Record<keyof StatValues, number>
   );
 
+  if (loading) {
+    return (
+      <section className="flex flex-col gap-8">
+        <AddPlayerForm />
+        <p className="p-6 text-xl">Loading home page...</p>
+      </section>
+    );
+  }
+
+  if (error) {
+    console.error("Failed to load home data:", error);
+    return (
+      <section className="flex flex-col gap-8">
+        <AddPlayerForm />
+        <p className="p-6 text-xl">Error loading home page.</p>
+      </section>
+    );
+  }
+
   return (
     <section className="flex flex-col gap-8">
       <AddPlayerForm />
-      <DemoPlayerDetails />
 
-      <div className="flex flex-row mx-auto w-full gap-4 justify-between">
-        <StatsCard label={labels[0].label} value={totals[labels[0].key]} />
-        <StatsCard label={labels[1].label} value={totals[labels[1].key]} />
-        <StatsCard
-          label="Batting Avg"
-          value={battingAvg(totals.hits, totals.atBats)}
-        />
-      </div>
+      <section className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold">Team Roster</h2>
+            <p className="text-sm text-neutral-500">
+              Click a player to drill into their stats.
+            </p>
+          </div>
 
-      <Table>
-        <TableCaption>Your saved baseball stats</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Player</TableHead>
-            <TableHead>Opponent</TableHead>
-            {labels.map((item) => (
-              <TableHead key={item.key}>{item.label}</TableHead>
-            ))}
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
+          {selectedPlayerId && (
+            <button
+              className="buttonPrimary"
+              onClick={() => setSelectedPlayerId("")}
+            >
+              Show All Players
+            </button>
+          )}
+        </div>
 
-        <TableBody>
-          {statsArray.map((stat) => (
-            <TableRow key={stat.gameId}>
-              <TableCell>{stat.player?.name || "-"}</TableCell>
-              <TableCell>{stat.team2 || "-"}</TableCell>
+        {!players.length ? (
+          <p className="p-4 text-lg">No players added yet.</p>
+        ) : (
+          <Table>
+            <TableCaption>Your current team roster</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Player</TableHead>
+                <TableHead>#</TableHead>
+                <TableHead>Position</TableHead>
+                <TableHead>Games</TableHead>
+              </TableRow>
+            </TableHeader>
 
-              {labels.map((item) => (
-                <TableCell key={item.key}>{stat.stats[item.key]}</TableCell>
+            <TableBody>
+              {players.map((player) => {
+                const isSelected = selectedPlayerId === player.playerId;
+
+                return (
+                  <TableRow
+                    key={player.playerId}
+                    className={`cursor-pointer ${
+                      isSelected ? "bg-gray-100 font-semibold" : ""
+                    }`}
+                    onClick={() => setSelectedPlayerId(player.playerId)}
+                  >
+                    <TableCell>{player.name}</TableCell>
+                    <TableCell>{player.number ?? "-"}</TableCell>
+                    <TableCell>{player.position || "-"}</TableCell>
+                    <TableCell>{player.games?.length ?? 0}</TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </section>
+
+      <section className="flex flex-col gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">
+            {selectedPlayer
+              ? `${selectedPlayer.name} Stats`
+              : "Team Stats Overview"}
+          </h2>
+          <p className="text-sm text-neutral-500">
+            {selectedPlayer
+              ? `Showing games and totals for ${selectedPlayer.name}.`
+              : "Showing totals across all players."}
+          </p>
+        </div>
+
+        <div className="rounded-2xl border p-4 shadow-sm bg-white">
+  {selectedPlayer ? (
+    <div className="flex flex-col gap-2">
+      <h3 className="text-xl font-bold">{selectedPlayer.name}</h3>
+      <p className="text-sm text-neutral-600">
+        #{selectedPlayer.number ?? "-"} •{" "}
+        {selectedPlayer.position || "No position listed"}
+      </p>
+      <p className="text-sm text-neutral-500">
+        Games Played: {selectedPlayer.games?.length ?? 0}
+      </p>
+    </div>
+  ) : (
+    <div className="flex flex-col gap-2">
+      <h3 className="text-xl font-bold">Team Overview</h3>
+      <p className="text-sm text-neutral-600">
+        Select a player from the roster to drill into their stats.
+      </p>
+      <p className="text-sm text-neutral-500">
+        Total Players: {players.length}
+      </p>
+    </div>
+  )}
+</div>
+
+        <div className="flex flex-row mx-auto w-full gap-4 justify-between">
+          <StatsCard label={labels[0].label} value={totals[labels[0].key]} />
+          <StatsCard label={labels[1].label} value={totals[labels[1].key]} />
+          <StatsCard
+            label="Batting Avg"
+            value={battingAvg(totals.hits, totals.atBats)}
+          />
+        </div>
+
+        {!statsArray.length ? (
+          <p className="p-6 text-xl">
+            {selectedPlayer
+              ? `No saved stats yet for ${selectedPlayer.name}.`
+              : "No saved stats yet."}
+          </p>
+        ) : (
+          <Table>
+            <TableCaption>
+              {selectedPlayer
+                ? `${selectedPlayer.name}'s saved baseball stats`
+                : "All saved baseball stats"}
+            </TableCaption>
+
+            <TableHeader>
+              <TableRow>
+                <TableHead>Player</TableHead>
+                <TableHead>Opponent</TableHead>
+                {labels.map((item) => (
+                  <TableHead key={item.key}>{item.label}</TableHead>
+                ))}
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+
+            <TableBody>
+              {statsArray.map((stat) => (
+                <TableRow key={stat.gameId}>
+                  <TableCell>{stat.player?.name || "-"}</TableCell>
+                  <TableCell>{stat.team2 || "-"}</TableCell>
+
+                  {labels.map((item) => (
+                    <TableCell key={item.key}>{stat.stats[item.key]}</TableCell>
+                  ))}
+
+                  <TableCell>
+                    <button
+                      className="iconButton-destructive"
+                      onClick={() => handleDelete(stat.gameId)}
+                    >
+                      Delete
+                    </button>
+                  </TableCell>
+                </TableRow>
               ))}
 
-              <TableCell>
-                <button
-                  className="iconButton-destructive"
-                  onClick={() => handleDelete(stat.gameId)}
-                >
-                  Delete
-                </button>
-              </TableCell>
-            </TableRow>
-          ))}
-
-          <TableRow className="font-bold bg-gray-100">
-            <TableCell></TableCell>
-            <TableCell>Totals</TableCell>
-            {labels.map((item) => (
-              <TableCell key={item.key}>{totals[item.key]}</TableCell>
-            ))}
-            <TableCell></TableCell>
-          </TableRow>
-        </TableBody>
-      </Table>
+              <TableRow className="font-bold bg-gray-100">
+                <TableCell></TableCell>
+                <TableCell>Totals</TableCell>
+                {labels.map((item) => (
+                  <TableCell key={item.key}>{totals[item.key]}</TableCell>
+                ))}
+                <TableCell></TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        )}
+      </section>
     </section>
   );
 };

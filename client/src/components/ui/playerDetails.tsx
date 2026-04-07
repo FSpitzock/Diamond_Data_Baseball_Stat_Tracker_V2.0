@@ -65,3 +65,4 @@ export default PlayerDetails;
 export function DemoPlayerDetails() {
   return <PlayerDetails player={newPlayer} />;
 }
+
