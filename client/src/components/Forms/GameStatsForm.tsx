@@ -169,14 +169,14 @@ type PlayerOption = {
 const GameStatsForm: React.FC = () => {
   const location = useLocation();
   const editGame = location.state?.editGame as
-  | {
-      gameId: string;
-      playerId: string;
-      team1?: string;
-      team2?: string;
-      stats: GameStats;
-    }
-  | undefined;
+    | {
+        gameId: string;
+        playerId: string;
+        team1?: string;
+        team2?: string;
+        stats: GameStats;
+      }
+    | undefined;
   const [gameStats, setGameStats] = useState<GameStats>({
     ...initialGameStats,
   });
@@ -211,29 +211,45 @@ const GameStatsForm: React.FC = () => {
   const players: PlayerOption[] = playersData?.players ?? [];
 
   useEffect(() => {
-      if (editGame) {
-    setEditingGameId(editGame.gameId);
-    setEditingPlayerId(editGame.playerId);
-    setSelectedPlayerId(editGame.playerId);
-    
-    setPlayerGame({
-      gameId: Number(editGame.gameId),
-      date: "",
-      team1: editGame.team1 || "",
-      team2: editGame.team2 || "",
-      stats: editGame.stats,
-    });
+    if (editGame) {
+      setEditingGameId(editGame.gameId);
+      setEditingPlayerId(editGame.playerId);
+      setSelectedPlayerId(editGame.playerId);
 
-    setGameStats(editGame.stats);
-   }
+      setPlayerGame({
+        gameId: Number(editGame.gameId),
+        date: "",
+        team1: editGame.team1 || "",
+        team2: editGame.team2 || "",
+        stats: editGame.stats,
+      });
+
+      setGameStats(editGame.stats);
+    }
   }, [editGame]);
 
   useEffect(() => {
-  setPlayerGame((pg) => ({
-    ...pg,
-    stats: gameStats,
-  }));
-}, [gameStats]);
+    setPlayerGame((pg) => ({
+      ...pg,
+      stats: gameStats,
+    }));
+  }, [gameStats]);
+
+  const resetForm = () => {
+    setEditingGameId(null);
+    setEditingPlayerId(null);
+    setSelectedPlayerId("");
+    setGameStats({ ...initialGameStats });
+    setPlayerGame({
+      gameId: Date.now(),
+      date: "",
+      team1: "",
+      team2: "",
+      stats: { ...initialGameStats },
+    });
+
+    setNotification(null);
+  };
 
   const saveToBackend = async () => {
     if (!selectedPlayerId) {
@@ -296,17 +312,9 @@ const GameStatsForm: React.FC = () => {
         });
       }
 
-      setSelectedPlayerId("");
-      setGameStats({ ...initialGameStats });
-      setPlayerGame({
-        gameId: Date.now(),
-        date: "",
-        team1: "",
-        team2: "",
-        stats: { ...initialGameStats },
-      });
-
-      setTimeout(() => setNotification(null), 3000);
+      setTimeout(() => {
+        resetForm();
+      }, 3000);
     } catch (error) {
       console.error("❌ Failed to save player game:", error);
 
@@ -698,10 +706,20 @@ const GameStatsForm: React.FC = () => {
         </div>
       </div>
 
-      <div className="relative mt-4">
+      <div className="relative mt-4 flex gap-3">
         <button className="buttonPrimary" onClick={saveToBackend}>
           {editingGameId ? "Update Stats" : "Save Stats"}
         </button>
+
+        {editingGameId && (
+          <button
+            type="button"
+            className="iconButton-destructive"
+            onClick={resetForm}
+          >
+            Cancel Edit
+          </button>
+        )}
 
         {notification && (
           <div
