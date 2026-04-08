@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server-express');
+const { gql } = require("apollo-server-express");
 
 const typeDefs = gql`
   type GameStats {
@@ -29,7 +29,7 @@ const typeDefs = gql`
     team1: String
     team2: String
     stats: GameStats
-    }
+  }
 
   type Query {
     players: [Player]
@@ -40,13 +40,25 @@ const typeDefs = gql`
   }
 
   type Mutation {
-    addPlayer(
-      name: String!
-      number: Int
-      position: String
-    ): Player
+    addPlayer(name: String!, number: Int, position: String): Player
 
     addPlayerGame(
+      playerId: ID!
+      team1: String
+      team2: String
+      atBats: Int
+      hits: Int
+      singles: Int
+      doubles: Int
+      triples: Int
+      homeRuns: Int
+      rbi: Int
+      walks: Int
+      strikeOuts: Int
+    ): PlayerGame
+
+    updatePlayerGame(
+      gameId: ID!
       playerId: ID!
       team1: String
       team2: String

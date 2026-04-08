@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { gql } from "@apollo/client";
 import { useQuery, useMutation } from "@apollo/client/react";
+import { useNavigate } from "react-router-dom";
 import {
   Table,
   TableHeader,
@@ -12,6 +13,7 @@ import {
 } from "../components/ui/table";
 import StatsCard from "@/components/ui/statsCard";
 import AddPlayerForm from "../components/Forms/AddPlayerForm";
+import { useLocation } from "react-router-dom";
 
 type StatValues = {
   atBats: number;
@@ -35,6 +37,7 @@ type PlayerRecord = {
 
 type PlayerGameRecord = {
   gameId: string;
+  team1?: string;
   team2?: string;
   player?: {
     playerId: string;
@@ -59,6 +62,7 @@ const GET_HOME_DATA = gql`
 
     playerGames {
       gameId
+      team1
       team2
       player {
         playerId
@@ -91,6 +95,7 @@ const DELETE_PLAYER_GAME = gql`
 
 const Home: React.FC = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
+  const navigate = useNavigate();
 
   const [deletePlayerGame] = useMutation(DELETE_PLAYER_GAME, {
     refetchQueries: [{ query: GET_HOME_DATA }],
@@ -141,6 +146,20 @@ const Home: React.FC = () => {
     } catch (error) {
       console.error("Failed to delete game:", error);
     }
+  };
+
+  const handleEdit = (game: PlayerGameRecord) => {
+    navigate("/Stats", {
+      state: {
+        editGame: {
+          gameId: game.gameId,
+          playerId: game.player?.playerId || "",
+          team1: game.team1 || "",
+          team2: game.team2 || "",
+          stats: game.stats,
+        },
+      },
+    });
   };
 
   const battingAvg = (hits: number, atBats: number) => {
@@ -254,29 +273,29 @@ const Home: React.FC = () => {
         </div>
 
         <div className="rounded-2xl border p-4 shadow-sm bg-white">
-  {selectedPlayer ? (
-    <div className="flex flex-col gap-2">
-      <h3 className="text-xl font-bold">{selectedPlayer.name}</h3>
-      <p className="text-sm text-neutral-600">
-        #{selectedPlayer.number ?? "-"} •{" "}
-        {selectedPlayer.position || "No position listed"}
-      </p>
-      <p className="text-sm text-neutral-500">
-        Games Played: {selectedPlayer.games?.length ?? 0}
-      </p>
-    </div>
-  ) : (
-    <div className="flex flex-col gap-2">
-      <h3 className="text-xl font-bold">Team Overview</h3>
-      <p className="text-sm text-neutral-600">
-        Select a player from the roster to drill into their stats.
-      </p>
-      <p className="text-sm text-neutral-500">
-        Total Players: {players.length}
-      </p>
-    </div>
-  )}
-</div>
+          {selectedPlayer ? (
+            <div className="flex flex-col gap-2">
+              <h3 className="text-xl font-bold">{selectedPlayer.name}</h3>
+              <p className="text-sm text-neutral-600">
+                #{selectedPlayer.number ?? "-"} •{" "}
+                {selectedPlayer.position || "No position listed"}
+              </p>
+              <p className="text-sm text-neutral-500">
+                Games Played: {selectedPlayer.games?.length ?? 0}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <h3 className="text-xl font-bold">Team Overview</h3>
+              <p className="text-sm text-neutral-600">
+                Select a player from the roster to drill into their stats.
+              </p>
+              <p className="text-sm text-neutral-500">
+                Total Players: {players.length}
+              </p>
+            </div>
+          )}
+        </div>
 
         <div className="flex flex-row mx-auto w-full gap-4 justify-between">
           <StatsCard label={labels[0].label} value={totals[labels[0].key]} />
@@ -323,6 +342,12 @@ const Home: React.FC = () => {
                   ))}
 
                   <TableCell>
+                    <button
+                      className="iconButton"
+                      onClick={() => handleEdit(stat)}
+                    >
+                      Edit
+                    </button>
                     <button
                       className="iconButton-destructive"
                       onClick={() => handleDelete(stat.gameId)}

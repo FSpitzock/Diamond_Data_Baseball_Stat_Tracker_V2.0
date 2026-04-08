@@ -8,6 +8,7 @@ import {
   MinusIcon,
   ArrowCounterClockwiseIcon,
 } from "@phosphor-icons/react";
+import { useLocation } from "react-router-dom";
 
 const GET_PLAYER_GAMES = gql`
   query GetPlayerGames {
@@ -37,6 +38,57 @@ const GET_PLAYERS = gql`
       name
       number
       position
+    }
+  }
+`;
+
+const UPDATE_PLAYER_GAME = gql`
+  mutation UpdatePlayerGame(
+    $gameId: ID!
+    $playerId: ID!
+    $team1: String
+    $team2: String
+    $atBats: Int
+    $hits: Int
+    $singles: Int
+    $doubles: Int
+    $triples: Int
+    $homeRuns: Int
+    $rbi: Int
+    $walks: Int
+    $strikeOuts: Int
+  ) {
+    updatePlayerGame(
+      gameId: $gameId
+      playerId: $playerId
+      team1: $team1
+      team2: $team2
+      atBats: $atBats
+      hits: $hits
+      singles: $singles
+      doubles: $doubles
+      triples: $triples
+      homeRuns: $homeRuns
+      rbi: $rbi
+      walks: $walks
+      strikeOuts: $strikeOuts
+    ) {
+      gameId
+      playerId
+      date
+      team1
+      team2
+      stats {
+        atBats
+        hits
+        singles
+        doubles
+        triples
+        homeRuns
+        rbi
+        walks
+        strikeOuts
+      }
     }
   }
 `;
@@ -115,6 +167,16 @@ type PlayerOption = {
 };
 
 const GameStatsForm: React.FC = () => {
+  const location = useLocation();
+  const editGame = location.state?.editGame as
+  | {
+      gameId: string;
+      playerId: string;
+      team1?: string;
+      team2?: string;
+      stats: GameStats;
+    }
+  | undefined;
   const [gameStats, setGameStats] = useState<GameStats>({
     ...initialGameStats,
   });
@@ -128,6 +190,8 @@ const GameStatsForm: React.FC = () => {
   });
 
   const [selectedPlayerId, setSelectedPlayerId] = useState("");
+  const [editingGameId, setEditingGameId] = useState<string | null>(null);
+  const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
   const [notification, setNotification] = useState<Notification | null>(null);
 
   const { data: playersData, loading: playersLoading } = useQuery(GET_PLAYERS, {
@@ -139,11 +203,37 @@ const GameStatsForm: React.FC = () => {
     awaitRefetchQueries: true,
   });
 
+  const [updatePlayerGame] = useMutation(UPDATE_PLAYER_GAME, {
+    refetchQueries: [{ query: GET_PLAYER_GAMES }],
+    awaitRefetchQueries: true,
+  });
+
   const players: PlayerOption[] = playersData?.players ?? [];
 
   useEffect(() => {
-    setPlayerGame((pg) => ({ ...pg, stats: gameStats }));
-  }, [gameStats]);
+      if (editGame) {
+    setEditingGameId(editGame.gameId);
+    setEditingPlayerId(editGame.playerId);
+    setSelectedPlayerId(editGame.playerId);
+    
+    setPlayerGame({
+      gameId: Number(editGame.gameId),
+      date: "",
+      team1: editGame.team1 || "",
+      team2: editGame.team2 || "",
+      stats: editGame.stats,
+    });
+
+    setGameStats(editGame.stats);
+   }
+  }, [editGame]);
+
+  useEffect(() => {
+  setPlayerGame((pg) => ({
+    ...pg,
+    stats: gameStats,
+  }));
+}, [gameStats]);
 
   const saveToBackend = async () => {
     if (!selectedPlayerId) {
@@ -156,27 +246,55 @@ const GameStatsForm: React.FC = () => {
     }
 
     try {
-      await addPlayerGame({
-        variables: {
-          playerId: selectedPlayerId,
-          team1: playerGame.team1,
-          team2: playerGame.team2,
-          atBats: gameStats.atBats,
-          hits: gameStats.hits,
-          singles: gameStats.singles,
-          doubles: gameStats.doubles,
-          triples: gameStats.triples,
-          homeRuns: gameStats.homeRuns,
-          rbi: gameStats.rbi,
-          walks: gameStats.walks,
-          strikeOuts: gameStats.strikeOuts,
-        },
-      });
+      if (editingGameId) {
+        await updatePlayerGame({
+          variables: {
+            gameId: editingGameId,
+            playerId: selectedPlayerId,
+            team1: playerGame.team1,
+            team2: playerGame.team2,
+            atBats: gameStats.atBats,
+            hits: gameStats.hits,
+            singles: gameStats.singles,
+            doubles: gameStats.doubles,
+            triples: gameStats.triples,
+            homeRuns: gameStats.homeRuns,
+            rbi: gameStats.rbi,
+            walks: gameStats.walks,
+            strikeOuts: gameStats.strikeOuts,
+          },
+        });
 
-      setNotification({
-        message: "💾 Saved new game!",
-        type: "success",
-      });
+        setNotification({
+          message: "✏️ Game updated!",
+          type: "success",
+        });
+
+        setEditingGameId(null);
+        setEditingPlayerId(null);
+      } else {
+        await addPlayerGame({
+          variables: {
+            playerId: selectedPlayerId,
+            team1: playerGame.team1,
+            team2: playerGame.team2,
+            atBats: gameStats.atBats,
+            hits: gameStats.hits,
+            singles: gameStats.singles,
+            doubles: gameStats.doubles,
+            triples: gameStats.triples,
+            homeRuns: gameStats.homeRuns,
+            rbi: gameStats.rbi,
+            walks: gameStats.walks,
+            strikeOuts: gameStats.strikeOuts,
+          },
+        });
+
+        setNotification({
+          message: "💾 Saved new game!",
+          type: "success",
+        });
+      }
 
       setSelectedPlayerId("");
       setGameStats({ ...initialGameStats });
@@ -204,9 +322,11 @@ const GameStatsForm: React.FC = () => {
   return (
     <section className="counter">
       <header>
-        <h1>Game Stats</h1>
+        <h1>{editingGameId ? "Edit Game Stats" : "Game Stats"}</h1>
         <p className="text-sm text-neutral-500">
-          Select a player and enter stats for today's game.
+          {editingGameId
+            ? "Update this player's saved game stats."
+            : "Select a player and enter stats for today's game."}
         </p>
       </header>
 
@@ -580,7 +700,7 @@ const GameStatsForm: React.FC = () => {
 
       <div className="relative mt-4">
         <button className="buttonPrimary" onClick={saveToBackend}>
-          Save Stats
+          {editingGameId ? "Update Stats" : "Save Stats"}
         </button>
 
         {notification && (
