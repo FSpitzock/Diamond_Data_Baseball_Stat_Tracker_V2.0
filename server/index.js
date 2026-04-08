@@ -1,24 +1,33 @@
-const { ApolloServer } = require('apollo-server-express');
-const express = require('express');
-const typeDefs = require('./schemas/typeDefs');
-const resolvers = require('./schemas/resolvers');
+const { ApolloServer } = require("apollo-server-express");
+const express = require("express");
+const typeDefs = require("./schemas/typeDefs");
+const resolvers = require("./schemas/resolvers");
+const connectDB = require("./config/connection");
+require("dotenv").config();
 
 const app = express();
 
-// Create Apollo Server
 const server = new ApolloServer({
   typeDefs,
   resolvers,
 });
 
-// Start Apollo Server
 async function startServer() {
-  await server.start();
-  server.applyMiddleware({ app, path: '/graphql' });
+  await connectDB();
 
-  const PORT = 4000;
+  await server.start();
+
+  server.applyMiddleware({
+    app,
+    path: "/graphql",
+  });
+
+  const PORT = process.env.PORT || 4000;
+
   app.listen(PORT, () => {
-    console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
+    console.log(
+      `🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`
+    );
   });
 }
 

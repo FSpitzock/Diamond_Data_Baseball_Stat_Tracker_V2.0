@@ -1,122 +1,128 @@
-let players = [];
-let playerGames = [];
+const { Player, PlayerGame } = require("../models");
 
 const resolvers = {
   Query: {
-    players: () => players,
+    players: async () => {
+      return await Player.find();
+    },
 
-    player: (_, { playerId }) =>
-      players.find((p) => p.playerId === playerId),
+    player: async (_, { playerId }) => {
+      return await Player.findById(playerId);
+    },
 
-    playerGames: () => playerGames,
+    playerGames: async () => {
+      return await PlayerGame.find().populate("playerId");
+    },
 
-    playerGame: (_, { gameId }) =>
-      playerGames.find((g) => g.gameId === gameId),
+    playerGame: async (_, { gameId }) => {
+      return await PlayerGame.findById(gameId).populate("playerId");
+    },
 
-    playerGamesByPlayer: (_, { playerId }) =>
-      playerGames.filter((g) => g.playerId === playerId),
+    playerGamesByPlayer: async (_, { playerId }) => {
+      return await PlayerGame.find({ playerId }).populate("playerId");
+    },
   },
 
   Player: {
-    games: (parent) =>
-      playerGames.filter((g) => g.playerId === parent.playerId),
+    playerId: (parent) => parent._id.toString(),
+    games: async (parent) => {
+      return await PlayerGame.find({ playerId: parent._id });
+    },
   },
 
   PlayerGame: {
-    player: (parent) =>
-        players.find((p) => p.playerId === parent.playerId),
-},
+    gameId: (parent) => parent._id.toString(),
+    playerId: (parent) =>
+      parent.playerId && parent.playerId._id
+        ? parent.playerId._id.toString()
+        : parent.playerId.toString(),
 
-Mutation: {
-  addPlayer: (_, args) => {
-    const newPlayer = {
-      playerId: String(Date.now()),
-      name: args.name,
-      number: args.number || null,
-      position: args.position || "",
-    };
-
-    players.push(newPlayer);
-    return newPlayer;
+    player: async (parent) => {
+      if (parent.playerId && parent.playerId.name) {
+        return parent.playerId;
+      }
+      return await Player.findById(parent.playerId);
+    },
   },
 
-  addPlayerGame: (_, args) => {
-    const playerExists = players.find((p) => p.playerId === args.playerId);
+  Mutation: {
+    addPlayer: async (_, args) => {
+      return await Player.create({
+        name: args.name,
+        number: args.number,
+        position: args.position,
+      });
+    },
 
-    if (!playerExists) {
-      throw new Error("Player not found. Create the player first.");
-    }
+    addPlayerGame: async (_, args) => {
+      const playerExists = await Player.findById(args.playerId);
 
-    const newGame = {
-      gameId: String(Date.now()),
-      playerId: args.playerId,
-      date: new Date().toISOString(),
-      team1: args.team1 || "",
-      team2: args.team2 || "",
-      stats: {
-        atBats: args.atBats || 0,
-        hits: args.hits || 0,
-        singles: args.singles || 0,
-        doubles: args.doubles || 0,
-        triples: args.triples || 0,
-        homeRuns: args.homeRuns || 0,
-        rbi: args.rbi || 0,
-        walks: args.walks || 0,
-        strikeOuts: args.strikeOuts || 0,
-      },
-    };
+      if (!playerExists) {
+        throw new Error("Player not found. Create the player first.");
+      }
 
-    playerGames.push(newGame);
-    return newGame;
+      return await PlayerGame.create({
+        playerId: args.playerId,
+        team1: args.team1 || "",
+        team2: args.team2 || "",
+        stats: {
+          atBats: args.atBats || 0,
+          hits: args.hits || 0,
+          singles: args.singles || 0,
+          doubles: args.doubles || 0,
+          triples: args.triples || 0,
+          homeRuns: args.homeRuns || 0,
+          rbi: args.rbi || 0,
+          walks: args.walks || 0,
+          strikeOuts: args.strikeOuts || 0,
+        },
+      });
+    },
+
+    updatePlayerGame: async (_, args) => {
+      const playerExists = await Player.findById(args.playerId);
+
+      if (!playerExists) {
+        throw new Error("Player not found.");
+      }
+
+      const updatedGame = await PlayerGame.findByIdAndUpdate(
+        args.gameId,
+        {
+          playerId: args.playerId,
+          team1: args.team1 || "",
+          team2: args.team2 || "",
+          stats: {
+            atBats: args.atBats || 0,
+            hits: args.hits || 0,
+            singles: args.singles || 0,
+            doubles: args.doubles || 0,
+            triples: args.triples || 0,
+            homeRuns: args.homeRuns || 0,
+            rbi: args.rbi || 0,
+            walks: args.walks || 0,
+            strikeOuts: args.strikeOuts || 0,
+          },
+        },
+        { new: true }
+      );
+
+      if (!updatedGame) {
+        throw new Error("Game not found.");
+      }
+
+      return updatedGame;
+    },
+
+    deletePlayer: async (_, { playerId }) => {
+      await PlayerGame.deleteMany({ playerId });
+      return await Player.findByIdAndDelete(playerId);
+    },
+
+    deletePlayerGame: async (_, { gameId }) => {
+      return await PlayerGame.findByIdAndDelete(gameId);
+    },
   },
-
-  updatePlayerGame: (_, args) => {
-    const index = playerGames.findIndex((g) => g.gameId === args.gameId);
-
-    if (index === -1) {
-      throw new Error("Game not found.");
-    }
-
-    const playerExists = players.find((p) => p.playerId === args.playerId);
-
-    if (!playerExists) {
-      throw new Error("Player not found.");
-    }
-
-    const updatedGame = {
-      ...playerGames[index],
-      playerId: args.playerId,
-      team1: args.team1 || "",
-      team2: args.team2 || "",
-      stats: {
-        atBats: args.atBats || 0,
-        hits: args.hits || 0,
-        singles: args.singles || 0,
-        doubles: args.doubles || 0,
-        triples: args.triples || 0,
-        homeRuns: args.homeRuns || 0,
-        rbi: args.rbi || 0,
-        walks: args.walks || 0,
-        strikeOuts: args.strikeOuts || 0,
-      },
-    };
-
-    playerGames[index] = updatedGame;
-    return updatedGame;
-  },
-
-  deletePlayer: (_, { playerId }) => {
-    const player = players.find((p) => p.playerId === playerId);
-    players = players.filter((p) => p.playerId !== playerId);
-    playerGames = playerGames.filter((g) => g.playerId !== playerId);
-    return player;
-  },
-
-  deletePlayerGame: (_, { gameId }) => {
-    const game = playerGames.find((g) => g.gameId === gameId);
-    playerGames = playerGames.filter((g) => g.gameId !== gameId);
-    return game;
-  },
-},
 };
+
 module.exports = resolvers;
