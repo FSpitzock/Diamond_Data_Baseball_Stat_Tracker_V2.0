@@ -42,6 +42,13 @@ const typeDefs = gql`
   type Mutation {
     addPlayer(name: String!, number: Int, position: String): Player
 
+    updatePlayer(
+      playerId: ID!
+      name: String!
+      number: Int
+      position: String
+    ): Player
+
     addPlayerGame(
       playerId: ID!
       team1: String

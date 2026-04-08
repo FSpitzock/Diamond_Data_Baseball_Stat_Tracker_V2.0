@@ -54,6 +54,24 @@ const resolvers = {
       });
     },
 
+    updatePlayer: async (_, args) => {
+      const updatedPlayer = await Player.findByIdAndUpdate(
+        args.playerId,
+        {
+          name: args.name,
+          number: args.number,
+          position: args.position,
+        },
+        { new: true },
+      );
+
+      if (!updatedPlayer) {
+        throw new Error("Player not found.");
+      }
+
+      return updatedPlayer;
+    },
+
     addPlayerGame: async (_, args) => {
       const playerExists = await Player.findById(args.playerId);
 
@@ -104,7 +122,7 @@ const resolvers = {
             strikeOuts: args.strikeOuts || 0,
           },
         },
-        { new: true }
+        { new: true },
       );
 
       if (!updatedGame) {

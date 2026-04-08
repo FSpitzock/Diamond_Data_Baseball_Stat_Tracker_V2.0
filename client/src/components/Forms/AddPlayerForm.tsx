@@ -1,14 +1,40 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { gql } from "@apollo/client";
 import { useMutation } from "@apollo/client/react";
 
-const GET_PLAYERS = gql`
-  query GetPlayers {
+const GET_HOME_DATA = gql`
+  query GetHomeData {
     players {
       playerId
       name
       number
       position
+      games {
+        gameId
+      }
+    }
+
+    playerGames {
+      gameId
+      team1
+      team2
+      player {
+        playerId
+        name
+        number
+        position
+      }
+      stats {
+        atBats
+        hits
+        singles
+        doubles
+        triples
+        homeRuns
+        rbi
+        walks
+        strikeOuts
+      }
     }
   }
 `;
@@ -24,21 +50,85 @@ const ADD_PLAYER = gql`
   }
 `;
 
+const UPDATE_PLAYER = gql`
+  mutation UpdatePlayer(
+    $playerId: ID!
+    $name: String!
+    $number: Int
+    $position: String
+  ) {
+    updatePlayer(
+      playerId: $playerId
+      name: $name
+      number: $number
+      position: $position
+    ) {
+      playerId
+      name
+      number
+      position
+    }
+  }
+`;
+
 type Notification = {
   message: string;
   type: "success" | "error";
 };
 
-const AddPlayerForm: React.FC = () => {
+type EditablePlayer = {
+  playerId: string;
+  name: string;
+  number?: number | null;
+  position?: string | null;
+} | null;
+
+type AddPlayerFormProps = {
+  editingPlayer: EditablePlayer;
+  onCancelEdit: () => void;
+};
+
+const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
+  editingPlayer,
+  onCancelEdit,
+}) => {
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [position, setPosition] = useState("");
   const [notification, setNotification] = useState<Notification | null>(null);
 
   const [addPlayer] = useMutation(ADD_PLAYER, {
-    refetchQueries: [{ query: GET_PLAYERS }],
+    refetchQueries: [{ query: GET_HOME_DATA }],
     awaitRefetchQueries: true,
   });
+
+  const [updatePlayer] = useMutation(UPDATE_PLAYER, {
+    refetchQueries: [{ query: GET_HOME_DATA }],
+    awaitRefetchQueries: true,
+  });
+
+  useEffect(() => {
+    if (editingPlayer) {
+      setName(editingPlayer.name || "");
+      setNumber(
+        editingPlayer.number !== null && editingPlayer.number !== undefined
+          ? String(editingPlayer.number)
+          : "",
+      );
+      setPosition(editingPlayer.position || "");
+    } else {
+      setName("");
+      setNumber("");
+      setPosition("");
+    }
+  }, [editingPlayer]);
+
+  const resetForm = () => {
+    setName("");
+    setNumber("");
+    setPosition("");
+    setNotification(null);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,6 +143,29 @@ const AddPlayerForm: React.FC = () => {
     }
 
     try {
+      if (editingPlayer) {
+        await updatePlayer({
+          variables: {
+            playerId: editingPlayer.playerId,
+            name: name.trim(),
+            number: number.trim() ? parseInt(number, 10) : null,
+            position: position.trim(),
+          },
+        });
+
+        setNotification({
+          message: "✏️ Player updated successfully!",
+          type: "success",
+        });
+
+        setTimeout(() => {
+          resetForm();
+          onCancelEdit();
+        }, 2000);
+
+        return;
+      }
+
       await addPlayer({
         variables: {
           name: name.trim(),
@@ -66,17 +179,17 @@ const AddPlayerForm: React.FC = () => {
         type: "success",
       });
 
-      setName("");
-      setNumber("");
-      setPosition("");
+      resetForm();
 
       setTimeout(() => setNotification(null), 3000);
     } catch (error) {
-      console.error("Failed to add player:", error);
+      console.error("Failed to save player:", error);
+
       setNotification({
-        message: "Failed to add player. Check console for details.",
+        message: "Failed to save player. Check console for details.",
         type: "error",
       });
+
       setTimeout(() => setNotification(null), 5000);
     }
   };
@@ -84,9 +197,11 @@ const AddPlayerForm: React.FC = () => {
   return (
     <section className="counter">
       <header>
-        <h1>Add Player</h1>
+        <h1>{editingPlayer ? "Edit Player" : "Add Player"}</h1>
         <p className="text-sm text-neutral-500">
-          Create a player before adding game stats.
+          {editingPlayer
+            ? "Update the selected player's information."
+            : "Create a player before adding game stats."}
         </p>
       </header>
 
@@ -121,10 +236,23 @@ const AddPlayerForm: React.FC = () => {
           />
         </div>
 
-        <div className="relative mt-2">
+        <div className="relative mt-2 flex gap-3">
           <button type="submit" className="buttonPrimary">
-            Add Player
+            {editingPlayer ? "Update Player" : "Add Player"}
           </button>
+
+          {editingPlayer && (
+            <button
+              type="button"
+              className="iconButton-destructive"
+              onClick={() => {
+                resetForm();
+                onCancelEdit();
+              }}
+            >
+              Cancel Edit
+            </button>
+          )}
 
           {notification && (
             <div

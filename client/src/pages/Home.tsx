@@ -13,7 +13,6 @@ import {
 } from "../components/ui/table";
 import StatsCard from "@/components/ui/statsCard";
 import AddPlayerForm from "../components/Forms/AddPlayerForm";
-import { useLocation } from "react-router-dom";
 
 type StatValues = {
   atBats: number;
@@ -96,6 +95,7 @@ const DELETE_PLAYER_GAME = gql`
 const Home: React.FC = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
   const navigate = useNavigate();
+  const [editingPlayer, setEditingPlayer] = useState<PlayerRecord | null>(null);
 
   const [deletePlayerGame] = useMutation(DELETE_PLAYER_GAME, {
     refetchQueries: [{ query: GET_HOME_DATA }],
@@ -110,13 +110,13 @@ const Home: React.FC = () => {
   const allGames: PlayerGameRecord[] = data?.playerGames ?? [];
 
   const selectedPlayer = players.find(
-    (player) => player.playerId === selectedPlayerId
+    (player) => player.playerId === selectedPlayerId,
   );
 
   const statsArray: PlayerGameRecord[] = useMemo(() => {
     if (!selectedPlayerId) return allGames;
     return allGames.filter(
-      (game) => game.player?.playerId === selectedPlayerId
+      (game) => game.player?.playerId === selectedPlayerId,
     );
   }, [allGames, selectedPlayerId]);
 
@@ -134,7 +134,7 @@ const Home: React.FC = () => {
 
   const handleDelete = async (gameId: string) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this game?"
+      "Are you sure you want to delete this game?",
     );
 
     if (!confirmed) return;
@@ -171,17 +171,20 @@ const Home: React.FC = () => {
     (acc, item) => {
       acc[item.key] = statsArray.reduce(
         (sum, stat) => sum + (stat.stats?.[item.key] || 0),
-        0
+        0,
       );
       return acc;
     },
-    {} as Record<keyof StatValues, number>
+    {} as Record<keyof StatValues, number>,
   );
 
   if (loading) {
     return (
       <section className="flex flex-col gap-8">
-        <AddPlayerForm />
+        <AddPlayerForm
+          editingPlayer={editingPlayer}
+          onCancelEdit={() => setEditingPlayer(null)}
+        />
         <p className="p-6 text-xl">Loading home page...</p>
       </section>
     );
@@ -191,7 +194,10 @@ const Home: React.FC = () => {
     console.error("Failed to load home data:", error);
     return (
       <section className="flex flex-col gap-8">
-        <AddPlayerForm />
+        <AddPlayerForm
+          editingPlayer={editingPlayer}
+          onCancelEdit={() => setEditingPlayer(null)}
+        />
         <p className="p-6 text-xl">Error loading home page.</p>
       </section>
     );
@@ -199,7 +205,10 @@ const Home: React.FC = () => {
 
   return (
     <section className="flex flex-col gap-8">
-      <AddPlayerForm />
+      <AddPlayerForm
+        editingPlayer={editingPlayer}
+        onCancelEdit={() => setEditingPlayer(null)}
+      />
 
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
@@ -231,6 +240,7 @@ const Home: React.FC = () => {
                 <TableHead>#</TableHead>
                 <TableHead>Position</TableHead>
                 <TableHead>Games</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -241,15 +251,40 @@ const Home: React.FC = () => {
                 return (
                   <TableRow
                     key={player.playerId}
-                    className={`cursor-pointer ${
-                      isSelected ? "bg-gray-100 font-semibold" : ""
-                    }`}
-                    onClick={() => setSelectedPlayerId(player.playerId)}
+                    className={`${isSelected ? "bg-gray-100 font-semibold" : ""}`}
                   >
-                    <TableCell>{player.name}</TableCell>
-                    <TableCell>{player.number ?? "-"}</TableCell>
-                    <TableCell>{player.position || "-"}</TableCell>
-                    <TableCell>{player.games?.length ?? 0}</TableCell>
+                    <TableCell
+                      className="cursor-pointer"
+                      onClick={() => setSelectedPlayerId(player.playerId)}
+                    >
+                      {player.name}
+                    </TableCell>
+                    <TableCell
+                      className="cursor-pointer"
+                      onClick={() => setSelectedPlayerId(player.playerId)}
+                    >
+                      {player.number ?? "-"}
+                    </TableCell>
+                    <TableCell
+                      className="cursor-pointer"
+                      onClick={() => setSelectedPlayerId(player.playerId)}
+                    >
+                      {player.position || "-"}
+                    </TableCell>
+                    <TableCell
+                      className="cursor-pointer"
+                      onClick={() => setSelectedPlayerId(player.playerId)}
+                    >
+                      {player.games?.length ?? 0}
+                    </TableCell>
+                    <TableCell>
+                      <button
+                        className="iconButton"
+                        onClick={() => setEditingPlayer(player)}
+                      >
+                        Edit
+                      </button>
+                    </TableCell>
                   </TableRow>
                 );
               })}
