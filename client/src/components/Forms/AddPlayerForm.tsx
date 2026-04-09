@@ -71,6 +71,21 @@ const UPDATE_PLAYER = gql`
   }
 `;
 
+const positionOptions = [
+  "",
+  "Pitcher",
+  "Catcher",
+  "First Base",
+  "Second Base",
+  "Third Base",
+  "Shortstop",
+  "Left Field",
+  "Center Field",
+  "Right Field",
+  "Designated Hitter",
+  "Utility",
+];
+
 type Notification = {
   message: string;
   type: "success" | "error";
@@ -227,13 +242,20 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
         </div>
 
         <div>
-          <input
+          <select
             className="items-stretch w-full"
-            type="text"
-            placeholder="Position"
             value={position}
             onChange={(e) => setPosition(e.target.value)}
-          />
+          >
+            <option value="">Select Position</option>
+            {positionOptions
+              .filter((p) => p !== "")
+              .map((pos) => (
+                <option key={pos} value={pos}>
+                  {pos}
+                </option>
+              ))}
+          </select>
         </div>
 
         <div className="relative mt-2 flex gap-3">
