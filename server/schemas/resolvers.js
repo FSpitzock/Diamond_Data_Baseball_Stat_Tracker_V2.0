@@ -183,6 +183,7 @@ const resolvers = {
       }
       await PlayerGame.deleteMany({ playerId });
       return await Player.findByIdAndDelete(playerId);
+ 
     },
 
     deletePlayerGame: async (_, { gameId }, context) => {
@@ -191,6 +192,7 @@ const resolvers = {
       }
       return await PlayerGame.findByIdAndDelete(gameId);
     },
+    
   },
 };
 

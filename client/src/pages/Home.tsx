@@ -92,12 +92,26 @@ const DELETE_PLAYER_GAME = gql`
   }
 `;
 
+const DELETE_PLAYER = gql`
+  mutation DeletePlayer($playerId: ID!) {
+    deletePlayer(playerId: $playerId) {
+      playerId
+      name
+    }
+  }
+`;
+
 const Home: React.FC = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
   const navigate = useNavigate();
   const [editingPlayer, setEditingPlayer] = useState<PlayerRecord | null>(null);
 
   const [deletePlayerGame] = useMutation(DELETE_PLAYER_GAME, {
+    refetchQueries: [{ query: GET_HOME_DATA }],
+    awaitRefetchQueries: true,
+  });
+
+  const [deletePlayer] = useMutation(DELETE_PLAYER, {
     refetchQueries: [{ query: GET_HOME_DATA }],
     awaitRefetchQueries: true,
   });
@@ -145,6 +159,30 @@ const Home: React.FC = () => {
       });
     } catch (error) {
       console.error("Failed to delete game:", error);
+    }
+  };
+
+  const handleDeletePlayer = async (playerId: string, playerName: string) => {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${playerName}? This will also delete all of their saved games.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deletePlayer({
+        variables: { playerId },
+      });
+
+      if (selectedPlayerId === playerId) {
+        setSelectedPlayerId("");
+      }
+
+      if (editingPlayer?.playerId === playerId) {
+        setEditingPlayer(null);
+      }
+    } catch (error) {
+      console.error("Failed to delete player:", error);
     }
   };
 
@@ -278,12 +316,23 @@ const Home: React.FC = () => {
                       {player.games?.length ?? 0}
                     </TableCell>
                     <TableCell>
-                      <button
-                        className="iconButton"
-                        onClick={() => setEditingPlayer(player)}
-                      >
-                        Edit
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          className="iconButton"
+                          onClick={() => setEditingPlayer(player)}
+                        >
+                          Edit
+                        </button>
+
+                        <button
+                          className="iconButton-destructive"
+                          onClick={() =>
+                            handleDeletePlayer(player.playerId, player.name)
+                          }
+                        >
+                          Delete
+                        </button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
