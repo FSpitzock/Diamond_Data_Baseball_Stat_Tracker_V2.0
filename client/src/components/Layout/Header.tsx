@@ -1,17 +1,15 @@
 import { FC } from "react";
 import { NavLink, Link } from "react-router-dom";
 import Logo from "../../assets/diamond-data-logo.svg";
-
+import Auth from "../../utils/auth";
 
 const Header: FC = () => {
   return (
     <header className="header">
       <div className="header-container">
-
         {/* Logo */}
         <Link to="/" className="logo">
           <img src={Logo} alt="App Logo" className="logo-img" />
-          
         </Link>
 
         {/* Navigation */}
@@ -34,7 +32,7 @@ const Header: FC = () => {
             Stats
           </NavLink>
 
-            <NavLink
+          <NavLink
             to="/BaseballAI"
             className={({ isActive }) =>
               isActive ? "nav-link active" : "nav-link"
@@ -43,7 +41,7 @@ const Header: FC = () => {
             BaseballAI
           </NavLink>
 
-            <NavLink
+          <NavLink
             to="/BaseballCard"
             className={({ isActive }) =>
               isActive ? "nav-link active" : "nav-link"
@@ -51,8 +49,37 @@ const Header: FC = () => {
           >
             Baseball Card
           </NavLink>
-        </nav>
 
+          {Auth.loggedIn() ? (
+            <button
+              type="button"
+              className="nav-link"
+              onClick={() => Auth.logout()}
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
+              >
+                Login
+              </NavLink>
+
+              <NavLink
+                to="/signup"
+                className={({ isActive }) =>
+                  isActive ? "nav-link active" : "nav-link"
+                }
+              >
+                Sign Up
+              </NavLink>
+            </>
+          )}
+        </nav>
       </div>
     </header>
   );

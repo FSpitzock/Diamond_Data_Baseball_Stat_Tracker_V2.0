@@ -7,23 +7,45 @@ import BaseballCard from "./pages/BaseballCard";
 import NotFound from "./pages/NotFound";
 import Header from "./components/Layout/Header";
 import Footer from "./components/Layout/Footer";
-import '../src/App.css';
-import { ApolloClient, InMemoryCache, HttpLink } from "@apollo/client";
+import "../src/App.css";
+import {
+  ApolloClient,
+  InMemoryCache,
+  createHttpLink,
+} from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
+import { setContext } from "@apollo/client/link/context";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+
+const httpLink = createHttpLink({
+  uri: "http://localhost:4000/graphql",
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem("id_token");
+
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    },
+  };
+});
 
 const client = new ApolloClient({
-  link: new HttpLink({
-    uri: "http://localhost:4000/graphql",
-  }),
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 
 const App: React.FC = () => {
   return (
-    <ApolloProvider client={client}> {/* Step 2: Wrap app in ApolloProvider */}
+    <ApolloProvider client={client}>
       <BrowserRouter basename="/">
         <Header />
         <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/" element={<Home />} />
           <Route path="/Stats" element={<Stats />} />
           <Route path="/BaseballAI" element={<BaseballAI />} />

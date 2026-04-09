@@ -9,14 +9,16 @@ const Navigation: React.FC = () => {
         <Link to="/" className="nav-link">Home</Link>
         <Link to="/Stats" className="nav-link">Stats</Link>
         <Link to="/BaseballAI" className="nav-link">BaseballAI</Link>
-        <Link to="/Basecall Card" className="nav-link">Baseball Card</Link>
+        <Link to="/BaseballCard" className="nav-link">Baseball Card</Link>
       </div>
+
       <div className="nav-links">
         <h4>Support</h4>
         <Link to="/Help" className="nav-link">Help</Link>
         <Link to="/FAQ" className="nav-link">FAQ</Link>
         <Link to="/Contact" className="nav-link">Contact</Link>
       </div>
+
       <div className="nav-links">
         <h4>Legal</h4>
         <Link to="/Privacy" className="nav-link text-neutral-500">Privacy</Link>
