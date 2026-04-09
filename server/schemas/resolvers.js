@@ -1,4 +1,5 @@
-const { Player, PlayerGame } = require("../models");
+const { Player, PlayerGame, User } = require("../models");
+const { signToken } = require("../utils/auth");
 
 const resolvers = {
   Query: {
@@ -20,6 +21,14 @@ const resolvers = {
 
     playerGamesByPlayer: async (_, { playerId }) => {
       return await PlayerGame.find({ playerId }).populate("playerId");
+    },
+
+    me: async (_, __, context) => {
+      if (!context.user) {
+        throw new Error("Not authenticated");
+      }
+
+      return await User.findById(context.user._id);
     },
   },
 
@@ -46,7 +55,34 @@ const resolvers = {
   },
 
   Mutation: {
-    addPlayer: async (_, args) => {
+    addUser: async (_, { username, email, password }) => {
+      const user = await User.create({ username, email, password });
+      const token = signToken(user);
+
+      return { token, user };
+    },
+
+    login: async (_, { email, password }) => {
+      const user = await User.findOne({ email });
+
+      if (!user) {
+        throw new Error("Invalid credentials");
+      }
+
+      const correctPw = await user.isCorrectPassword(password);
+
+      if (!correctPw) {
+        throw new Error("Invalid credentials");
+      }
+
+      const token = signToken(user);
+      return { token, user };
+    },
+
+    addPlayer: async (_, args, context) => {
+      if (!context.user) {
+        throw new Error("Not authenticated");
+      }
       return await Player.create({
         name: args.name,
         number: args.number,
@@ -54,7 +90,10 @@ const resolvers = {
       });
     },
 
-    updatePlayer: async (_, args) => {
+    updatePlayer: async (_, args, context) => {
+      if (!context.user) {
+        throw new Error("Not authenticated");
+      }
       const updatedPlayer = await Player.findByIdAndUpdate(
         args.playerId,
         {
@@ -72,7 +111,10 @@ const resolvers = {
       return updatedPlayer;
     },
 
-    addPlayerGame: async (_, args) => {
+    addPlayerGame: async (_, args, context) => {
+      if (!context.user) {
+        throw new Error("Not authenticated");
+      }
       const playerExists = await Player.findById(args.playerId);
 
       if (!playerExists) {
@@ -97,7 +139,10 @@ const resolvers = {
       });
     },
 
-    updatePlayerGame: async (_, args) => {
+    updatePlayerGame: async (_, args, context) => {
+      if (!context.user) {
+        throw new Error("Not authenticated");
+      }
       const playerExists = await Player.findById(args.playerId);
 
       if (!playerExists) {
@@ -132,12 +177,18 @@ const resolvers = {
       return updatedGame;
     },
 
-    deletePlayer: async (_, { playerId }) => {
+    deletePlayer: async (_, { playerId }, context) => {
+      if (!context.user) {
+        throw new Error("Not authenticated");
+      }
       await PlayerGame.deleteMany({ playerId });
       return await Player.findByIdAndDelete(playerId);
     },
 
-    deletePlayerGame: async (_, { gameId }) => {
+    deletePlayerGame: async (_, { gameId }, context) => {
+      if (!context.user) {
+        throw new Error("Not authenticated");
+      }
       return await PlayerGame.findByIdAndDelete(gameId);
     },
   },
