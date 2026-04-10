@@ -1,5 +1,57 @@
-const { Player, PlayerGame, User } = require("../models");
-const { signToken } = require("../utils/auth");
+import { Player, PlayerGame, User } from "../models";
+import { signToken } from "../utils/auth";
+
+interface AuthUser {
+  _id: string;
+  username: string;
+  email: string;
+}
+
+interface GraphQLContext {
+  user?: AuthUser;
+}
+
+interface PlayerArgs {
+  playerId: string;
+}
+
+interface GameArgs {
+  gameId: string;
+}
+
+interface LoginArgs {
+  email: string;
+  password: string;
+}
+
+interface AddUserArgs {
+  username: string;
+  email: string;
+  password: string;
+}
+
+interface PlayerInputArgs {
+  playerId: string;
+  name: string;
+  number?: number;
+  position?: string;
+}
+
+interface PlayerGameInputArgs {
+  gameId?: string;
+  playerId: string;
+  team1?: string;
+  team2?: string;
+  atBats?: number;
+  hits?: number;
+  singles?: number;
+  doubles?: number;
+  triples?: number;
+  homeRuns?: number;
+  rbi?: number;
+  walks?: number;
+  strikeOuts?: number;
+}
 
 const resolvers = {
   Query: {
@@ -7,7 +59,7 @@ const resolvers = {
       return await Player.find();
     },
 
-    player: async (_, { playerId }) => {
+    player: async (_parent: unknown, { playerId }: PlayerArgs) => {
       return await Player.findById(playerId);
     },
 
@@ -15,15 +67,22 @@ const resolvers = {
       return await PlayerGame.find().populate("playerId");
     },
 
-    playerGame: async (_, { gameId }) => {
+    playerGame: async (_parent: unknown, { gameId }: GameArgs) => {
       return await PlayerGame.findById(gameId).populate("playerId");
     },
 
-    playerGamesByPlayer: async (_, { playerId }) => {
+    playerGamesByPlayer: async (
+      _parent: unknown,
+      { playerId }: PlayerArgs
+    ) => {
       return await PlayerGame.find({ playerId }).populate("playerId");
     },
 
-    me: async (_, __, context) => {
+    me: async (
+      _parent: unknown,
+      _args: unknown,
+      context: GraphQLContext
+    ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
       }
@@ -33,36 +92,39 @@ const resolvers = {
   },
 
   Player: {
-    playerId: (parent) => parent._id.toString(),
-    games: async (parent) => {
+    playerId: (parent: any) => parent._id.toString(),
+
+    games: async (parent: any) => {
       return await PlayerGame.find({ playerId: parent._id });
     },
   },
 
   PlayerGame: {
-    gameId: (parent) => parent._id.toString(),
-    playerId: (parent) =>
+    gameId: (parent: any) => parent._id.toString(),
+
+    playerId: (parent: any) =>
       parent.playerId && parent.playerId._id
         ? parent.playerId._id.toString()
         : parent.playerId.toString(),
 
-    player: async (parent) => {
+    player: async (parent: any) => {
       if (parent.playerId && parent.playerId.name) {
         return parent.playerId;
       }
+
       return await Player.findById(parent.playerId);
     },
   },
 
   Mutation: {
-    addUser: async (_, { username, email, password }) => {
+    addUser: async (_parent: unknown, { username, email, password }: AddUserArgs) => {
       const user = await User.create({ username, email, password });
       const token = signToken(user);
 
       return { token, user };
     },
 
-    login: async (_, { email, password }) => {
+    login: async (_parent: unknown, { email, password }: LoginArgs) => {
       const user = await User.findOne({ email });
 
       if (!user) {
@@ -79,10 +141,15 @@ const resolvers = {
       return { token, user };
     },
 
-    addPlayer: async (_, args, context) => {
+    addPlayer: async (
+      _parent: unknown,
+      args: Omit<PlayerInputArgs, "playerId">,
+      context: GraphQLContext
+    ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
       }
+
       return await Player.create({
         name: args.name,
         number: args.number,
@@ -90,10 +157,15 @@ const resolvers = {
       });
     },
 
-    updatePlayer: async (_, args, context) => {
+    updatePlayer: async (
+      _parent: unknown,
+      args: PlayerInputArgs,
+      context: GraphQLContext
+    ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
       }
+
       const updatedPlayer = await Player.findByIdAndUpdate(
         args.playerId,
         {
@@ -101,7 +173,7 @@ const resolvers = {
           number: args.number,
           position: args.position,
         },
-        { new: true },
+        { new: true }
       );
 
       if (!updatedPlayer) {
@@ -111,10 +183,15 @@ const resolvers = {
       return updatedPlayer;
     },
 
-    addPlayerGame: async (_, args, context) => {
+    addPlayerGame: async (
+      _parent: unknown,
+      args: PlayerGameInputArgs,
+      context: GraphQLContext
+    ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
       }
+
       const playerExists = await Player.findById(args.playerId);
 
       if (!playerExists) {
@@ -139,10 +216,15 @@ const resolvers = {
       });
     },
 
-    updatePlayerGame: async (_, args, context) => {
+    updatePlayerGame: async (
+      _parent: unknown,
+      args: PlayerGameInputArgs,
+      context: GraphQLContext
+    ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
       }
+
       const playerExists = await Player.findById(args.playerId);
 
       if (!playerExists) {
@@ -167,7 +249,7 @@ const resolvers = {
             strikeOuts: args.strikeOuts || 0,
           },
         },
-        { new: true },
+        { new: true }
       );
 
       if (!updatedGame) {
@@ -177,23 +259,31 @@ const resolvers = {
       return updatedGame;
     },
 
-    deletePlayer: async (_, { playerId }, context) => {
+    deletePlayer: async (
+      _parent: unknown,
+      { playerId }: PlayerArgs,
+      context: GraphQLContext
+    ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
       }
+
       await PlayerGame.deleteMany({ playerId });
       return await Player.findByIdAndDelete(playerId);
- 
     },
 
-    deletePlayerGame: async (_, { gameId }, context) => {
+    deletePlayerGame: async (
+      _parent: unknown,
+      { gameId }: GameArgs,
+      context: GraphQLContext
+    ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
       }
+
       return await PlayerGame.findByIdAndDelete(gameId);
     },
-    
   },
 };
 
-module.exports = resolvers;
+export default resolvers;
