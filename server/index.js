@@ -1,12 +1,11 @@
 const { ApolloServer } = require("apollo-server-express");
 const express = require("express");
+require("dotenv").config();
 
 const typeDefs = require("./schemas/typeDefs");
 const resolvers = require("./schemas/resolvers");
-
 const connectDB = require("./config/connection");
 const { authMiddleware } = require("./utils/auth");
-require("dotenv").config();
 
 const app = express();
 
@@ -19,6 +18,9 @@ const server = new ApolloServer({
 async function startServer() {
   await connectDB();
   await server.start();
+
+  app.use(express.urlencoded({ extended: false }));
+  app.use(express.json());
 
   server.applyMiddleware({
     app,
