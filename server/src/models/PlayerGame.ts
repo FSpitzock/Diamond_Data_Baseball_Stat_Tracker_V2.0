@@ -1,7 +1,26 @@
-// server/models/PlayerGame.js
-const mongoose = require("mongoose");
+import mongoose, { Schema, Document, Model, Types } from "mongoose";
 
-const gameStatsSchema = new mongoose.Schema(
+interface IGameStats {
+  atBats?: number;
+  hits?: number;
+  singles?: number;
+  doubles?: number;
+  triples?: number;
+  homeRuns?: number;
+  rbi?: number;
+  walks?: number;
+  strikeOuts?: number;
+}
+
+export interface IPlayerGame extends Document {
+  playerId: Types.ObjectId;
+  team1: string;
+  team2: string;
+  date: Date;
+  stats: IGameStats;
+}
+
+const gameStatsSchema: Schema<IGameStats> = new Schema(
   {
     atBats: { type: Number, default: 0 },
     hits: { type: Number, default: 0 },
@@ -16,10 +35,10 @@ const gameStatsSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const playerGameSchema = new mongoose.Schema(
+const playerGameSchema: Schema<IPlayerGame> = new Schema(
   {
     playerId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: "Player",
       required: true,
     },
@@ -47,6 +66,9 @@ const playerGameSchema = new mongoose.Schema(
   }
 );
 
-const PlayerGame = mongoose.model("PlayerGame", playerGameSchema);
+const PlayerGame: Model<IPlayerGame> = mongoose.model<IPlayerGame>(
+  "PlayerGame",
+  playerGameSchema
+);
 
-module.exports = PlayerGame;
+export default PlayerGame;

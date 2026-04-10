@@ -1,13 +1,15 @@
-const { ApolloServer } = require("apollo-server-express");
-const express = require("express");
-require("dotenv").config();
+import { ApolloServer } from "apollo-server-express";
+import express, { Application } from "express";
+import dotenv from "dotenv";
 
-const typeDefs = require("./schemas/typeDefs");
-const resolvers = require("./schemas/resolvers");
-const connectDB = require("./config/connection");
-const { authMiddleware } = require("./utils/auth");
+import typeDefs from "./schemas/typeDefs";
+import resolvers from "./schemas/resolvers";
+import connectDB from "./config/connection";
+import { authMiddleware } from "./utils/auth";
 
-const app = express();
+dotenv.config();
+
+const app: Application = express();
 
 const server = new ApolloServer({
   typeDefs,
@@ -15,7 +17,7 @@ const server = new ApolloServer({
   context: authMiddleware,
 });
 
-async function startServer() {
+async function startServer(): Promise<void> {
   await connectDB();
   await server.start();
 
