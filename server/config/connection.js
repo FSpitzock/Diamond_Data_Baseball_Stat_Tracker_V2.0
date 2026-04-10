@@ -1,7 +1,13 @@
 const mongoose = require("mongoose");
 
-const db = process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/diamond-data";
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI);
+    console.log("✅ MongoDB connected");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error.message);
+    process.exit(1);
+  }
+};
 
-mongoose.connect(db);
-
-module.exports = mongoose.connection;
+module.exports = connectDB;
