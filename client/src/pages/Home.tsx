@@ -11,7 +11,7 @@ import {
   TableCell,
   TableCaption,
 } from "../components/ui/table";
-import StatsCard from "@/components/ui/statsCard";
+import TeamLogo from "../assets/outlaws-logo.jpg; 
 
 type StatValues = {
   atBats: number;
@@ -214,12 +214,20 @@ const Home: React.FC = () => {
     <section className="flex flex-col gap-8">
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">Team Roster</h2>
-            <p className="text-sm text-neutral-500">
-              Click a player to drill into their stats.
-            </p>
-          </div>
+          <div className="flex items-center justify-center gap-4">
+              <img
+                src={TeamLogo}
+                alt="Oviedo Outlaws 9U"
+                className="w-16 h-16 rounded-lg border bg-white p-1 shadow-sm"
+              />
+
+              <div className="text-left">
+                <h2 className="text-3xl font-bold">Oviedo Outlaws 9U</h2>
+                <p className="text-sm text-neutral-500">
+                  Team roster and player performance overview.
+                </p>
+              </div>
+            </div>
 
           {selectedPlayerId && (
             <button
@@ -302,7 +310,7 @@ const Home: React.FC = () => {
           <h2 className="text-2xl font-bold">
             {selectedPlayer
               ? `${selectedPlayer.name} Stats`
-              : "Team Stats Overview"}
+              : "Oviedo Outlaws 9U Overview"}
           </h2>
           <p className="text-sm text-neutral-500">
             {selectedPlayer
@@ -311,38 +319,95 @@ const Home: React.FC = () => {
           </p>
         </div>
 
-        <div className="rounded-2xl border p-4 shadow-sm bg-white">
+        <div className="grid gap-3 rounded-xl border bg-white p-4 shadow-sm md:grid-cols-3">
           {selectedPlayer ? (
-            <div className="flex flex-col gap-2">
-              <h3 className="text-xl font-bold">{selectedPlayer.name}</h3>
-              <p className="text-sm text-neutral-600">
-                #{selectedPlayer.number ?? "-"} •{" "}
-                {selectedPlayer.position || "No position listed"}
-              </p>
-              <p className="text-sm text-neutral-500">
-                Games Played: {selectedPlayer.games?.length ?? 0}
-              </p>
-            </div>
+            <>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-neutral-400">
+                  Player
+                </p>
+                <p className="text-base font-semibold text-neutral-900">
+                  {selectedPlayer.name}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-wide text-neutral-400">
+                  Position
+                </p>
+                <p className="text-base font-semibold text-neutral-900">
+                  {selectedPlayer.position || "Not listed"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-wide text-neutral-400">
+                  Games Played
+                </p>
+                <p className="text-base font-semibold text-neutral-900">
+                  {selectedPlayer.games?.length ?? 0}
+                </p>
+              </div>
+            </>
           ) : (
-            <div className="flex flex-col gap-2">
-              <h3 className="text-xl font-bold">Team Overview</h3>
-              <p className="text-sm text-neutral-600">
-                Select a player from the roster to drill into their stats.
-              </p>
-              <p className="text-sm text-neutral-500">
-                Total Players: {players.length}
-              </p>
-            </div>
+            <>
+              <div>
+                <p className="text-xs uppercase tracking-wide text-neutral-400">
+                  Team
+                </p>
+                <p className="text-base font-semibold text-neutral-900">
+                  Oviedo Outlaws 9U
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-wide text-neutral-400">
+                  Players
+                </p>
+                <p className="text-base font-semibold text-neutral-900">
+                  {players.length}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-wide text-neutral-400">
+                  View
+                </p>
+                <p className="text-base font-semibold text-neutral-900">
+                  All Team Stats
+                </p>
+              </div>
+            </>
           )}
         </div>
 
-        <div className="flex flex-row mx-auto w-full gap-4 justify-between">
-          <StatsCard label={labels[0].label} value={totals[labels[0].key]} />
-          <StatsCard label={labels[1].label} value={totals[labels[1].key]} />
-          <StatsCard
-            label="Batting Avg"
-            value={battingAvg(totals.hits, totals.atBats)}
-          />
+        <div className="grid gap-3 md:grid-cols-3">
+          <div className="rounded-xl border bg-white p-4 shadow-sm">
+            <p className="text-xs uppercase tracking-wide text-neutral-400">
+              At Bats
+            </p>
+            <p className="mt-2 text-3xl font-semibold text-neutral-900">
+              {totals.atBats}
+            </p>
+          </div>
+
+          <div className="rounded-xl border bg-white p-4 shadow-sm">
+            <p className="text-xs uppercase tracking-wide text-neutral-400">
+              Hits
+            </p>
+            <p className="mt-2 text-3xl font-semibold text-neutral-900">
+              {totals.hits}
+            </p>
+          </div>
+
+          <div className="rounded-xl border bg-white p-4 shadow-sm">
+            <p className="text-xs uppercase tracking-wide text-neutral-400">
+              Batting Avg
+            </p>
+            <p className="mt-2 text-3xl font-semibold text-neutral-900">
+              {battingAvg(totals.hits, totals.atBats)}
+            </p>
+          </div>
         </div>
 
         {!statsArray.length ? (
