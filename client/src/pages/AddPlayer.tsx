@@ -1,6 +1,8 @@
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import AddPlayerForm from "../components/Forms/AddPlayerForm";
+import logo from "../assets/outlaws-logo.png";  
+
 
 type PlayerRecord = {
   playerId: string;
@@ -21,7 +23,7 @@ return (
     <section className="add-player-hero">
 
       <img
-        src="/outlaws-logo.png"
+        src={logo}
         alt="Oviedo Outlaws"
         className="team-logo"
       />
