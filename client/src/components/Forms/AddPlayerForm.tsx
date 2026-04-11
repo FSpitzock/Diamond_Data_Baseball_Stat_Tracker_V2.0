@@ -260,96 +260,85 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
   };
 
   return (
-    <section className="counter">
-      <header>
-        <h1>{editingPlayer ? "Edit Player" : "Add Player"}</h1>
-        <p className="text-sm text-neutral-500">
-          {editingPlayer
-            ? "Update the selected player's information."
-            : "Create a player before adding game stats."}
-        </p>
-      </header>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <div>
+        <input
+          className="items-stretch w-full"
+          type="text"
+          placeholder="Player Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </div>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div>
-          <input
-            className="items-stretch w-full"
-            type="text"
-            placeholder="Player Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
+      <div>
+        <input
+          className="items-stretch w-full"
+          type="number"
+          placeholder="Jersey Number"
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+        />
+      </div>
 
-        <div>
-          <input
-            className="items-stretch w-full"
-            type="number"
-            placeholder="Jersey Number"
-            value={number}
-            onChange={(e) => setNumber(e.target.value)}
-          />
-        </div>
+      <div>
+        <select
+          className="items-stretch w-full"
+          value={position}
+          onChange={(e) => setPosition(e.target.value)}
+        >
+          <option value="">Select Position</option>
+          {positionOptions
+            .filter((p) => p !== "")
+            .map((pos) => (
+              <option key={pos} value={pos}>
+                {pos}
+              </option>
+            ))}
+        </select>
+      </div>
 
-        <div>
-          <select
-            className="items-stretch w-full"
-            value={position}
-            onChange={(e) => setPosition(e.target.value)}
-          >
-            <option value="">Select Position</option>
-            {positionOptions
-              .filter((p) => p !== "")
-              .map((pos) => (
-                <option key={pos} value={pos}>
-                  {pos}
-                </option>
-              ))}
-          </select>
-        </div>
+      <div className="relative mt-2 flex gap-3">
+        <button type="submit" className="buttonPrimary">
+          {editingPlayer ? "Update Player" : "Add Player"}
+        </button>
 
-        <div className="relative mt-2 flex gap-3">
-          <button type="submit" className="buttonPrimary">
-            {editingPlayer ? "Update Player" : "Add Player"}
-          </button>
+        {editingPlayer && (
+          <>
+            <button
+              type="button"
+              className="iconButton"
+              onClick={() => {
+                resetForm();
+                onCancelEdit();
+              }}
+            >
+              Cancel Edit
+            </button>
 
-          {editingPlayer && (
-            <>
-              <button
-                type="button"
-                className="iconButton"
-                onClick={() => {
-                  resetForm();
-                  onCancelEdit();
-                }}
-              >
-                Cancel Edit
-              </button>
+            <button
+              type="button"
+              className="iconButton-destructive"
+              onClick={handleDeletePlayer}
+            >
+              Delete Player
+            </button>
+          </>
+        )}
 
-              <button
-                type="button"
-                className="iconButton-destructive"
-                onClick={handleDeletePlayer}
-              >
-                Delete Player
-              </button>
-            </>
-          )}
-
-          {notification && (
-            <div
-              className={`absolute top-[-3rem] left-1/2 transform -translate-x-1/2
+        {notification && (
+          <div
+            className={`absolute top-[-3rem] left-1/2 transform -translate-x-1/2
       px-4 py-2 rounded shadow-lg text-white font-semibold
       transition-all duration-300 ${
         notification.type === "success" ? "bg-green-500" : "bg-red-500"
       }`}
-            >
-              {notification.message}
-            </div>
-          )}
-        </div>
-      </form>
-    </section>
+          >
+            {notification.message}
+          </div>
+        )}
+      </div>
+    </form>
   );
 };
 
