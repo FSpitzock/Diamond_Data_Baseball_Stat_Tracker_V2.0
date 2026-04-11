@@ -29,6 +29,7 @@ const typeDefs = gql`
     name: String!
     number: Int
     position: String
+    image: String
     games: [PlayerGame]
   }
 
@@ -55,14 +56,19 @@ const typeDefs = gql`
     addUser(username: String!, email: String!, password: String!): Auth
     login(email: String!, password: String!): Auth
 
-    addPlayer(name: String!, number: Int, position: String): Player
+    addPlayer(
+  name: String!
+  number: Int
+  position: String
+  image: String
+): Player
 
-    updatePlayer(
-      playerId: ID!
-      name: String!
-      number: Int
-      position: String
-    ): Player
+  addPlayer(
+  name: String!
+  number: Int
+  position: String
+  image: String
+): Player
 
     addPlayerGame(
       playerId: ID!

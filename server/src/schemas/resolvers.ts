@@ -35,6 +35,7 @@ interface PlayerInputArgs {
   name: string;
   number?: number;
   position?: string;
+  image?: string;
 }
 
 interface PlayerGameInputArgs {
@@ -71,18 +72,11 @@ const resolvers = {
       return await PlayerGame.findById(gameId).populate("playerId");
     },
 
-    playerGamesByPlayer: async (
-      _parent: unknown,
-      { playerId }: PlayerArgs
-    ) => {
+    playerGamesByPlayer: async (_parent: unknown, { playerId }: PlayerArgs) => {
       return await PlayerGame.find({ playerId }).populate("playerId");
     },
 
-    me: async (
-      _parent: unknown,
-      _args: unknown,
-      context: GraphQLContext
-    ) => {
+    me: async (_parent: unknown, _args: unknown, context: GraphQLContext) => {
       if (!context.user) {
         throw new Error("Not authenticated");
       }
@@ -117,7 +111,10 @@ const resolvers = {
   },
 
   Mutation: {
-    addUser: async (_parent: unknown, { username, email, password }: AddUserArgs) => {
+    addUser: async (
+      _parent: unknown,
+      { username, email, password }: AddUserArgs,
+    ) => {
       const user = await User.create({ username, email, password });
       const token = signToken(user);
 
@@ -144,7 +141,7 @@ const resolvers = {
     addPlayer: async (
       _parent: unknown,
       args: Omit<PlayerInputArgs, "playerId">,
-      context: GraphQLContext
+      context: GraphQLContext,
     ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
@@ -154,13 +151,14 @@ const resolvers = {
         name: args.name,
         number: args.number,
         position: args.position,
+        image: args.image || "",
       });
     },
 
     updatePlayer: async (
       _parent: unknown,
       args: PlayerInputArgs,
-      context: GraphQLContext
+      context: GraphQLContext,
     ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
@@ -172,8 +170,9 @@ const resolvers = {
           name: args.name,
           number: args.number,
           position: args.position,
+          image: args.image || "",
         },
-        { new: true }
+        { new: true },
       );
 
       if (!updatedPlayer) {
@@ -186,7 +185,7 @@ const resolvers = {
     addPlayerGame: async (
       _parent: unknown,
       args: PlayerGameInputArgs,
-      context: GraphQLContext
+      context: GraphQLContext,
     ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
@@ -219,7 +218,7 @@ const resolvers = {
     updatePlayerGame: async (
       _parent: unknown,
       args: PlayerGameInputArgs,
-      context: GraphQLContext
+      context: GraphQLContext,
     ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
@@ -249,7 +248,7 @@ const resolvers = {
             strikeOuts: args.strikeOuts || 0,
           },
         },
-        { new: true }
+        { new: true },
       );
 
       if (!updatedGame) {
@@ -262,7 +261,7 @@ const resolvers = {
     deletePlayer: async (
       _parent: unknown,
       { playerId }: PlayerArgs,
-      context: GraphQLContext
+      context: GraphQLContext,
     ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
@@ -275,7 +274,7 @@ const resolvers = {
     deletePlayerGame: async (
       _parent: unknown,
       { gameId }: GameArgs,
-      context: GraphQLContext
+      context: GraphQLContext,
     ) => {
       if (!context.user) {
         throw new Error("Not authenticated");
