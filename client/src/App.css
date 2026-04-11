@@ -1049,3 +1049,33 @@ h3 { @apply
     grid-template-columns: 1fr;
   }
 }
+
+.roster-table thead th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280;
+  padding: 0.75rem 0.75rem;
+}
+
+.roster-table thead {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.roster-table thead tr {
+  background: #f8fafc;
+}
+
+.roster-table tbody td {
+  padding: 0.9rem 0.75rem;
+}
+
+.roster-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.roster-table tbody tr:hover {
+  background: #fafafa;
+}
