@@ -156,7 +156,7 @@ const Home: React.FC = () => {
   };
 
   const handleEditPlayer = (player: PlayerRecord) => {
-    navigate("/add-player", {
+    navigate("/AddPlayer", {
       state: {
         editingPlayer: player,
       },
