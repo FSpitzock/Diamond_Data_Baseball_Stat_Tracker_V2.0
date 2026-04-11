@@ -329,24 +329,26 @@ const GameStatsForm: React.FC = () => {
 
   return (
     <section className="counter">
-      <header>
-        <h1>{editingGameId ? "Edit Game Stats" : "Game Stats"}</h1>
-        <p className="text-sm text-neutral-500">
-          {editingGameId
-            ? "Update this player's saved game stats."
-            : "Select a player and enter stats for today's game."}
-        </p>
-      </header>
+      <div className="game-setup">
+  <div className="game-setup-header">
+    <p className="game-setup-eyebrow">Game Setup</p>
+    <h2>Player & Opponent</h2>
+  </div>
 
-      <div>
+  <div className="game-setup-grid">
+    <div className="form-group">
+      <label htmlFor="playerSelect">Select Player</label>
+      <div className="select-wrap">
         <select
-          className="items-stretch w-full"
+          id="playerSelect"
+          className="form-input setup-select"
           value={selectedPlayerId}
           onChange={(e) => setSelectedPlayerId(e.target.value)}
           disabled={playersLoading}
         >
+          
           <option value="">
-            {playersLoading ? "Loading players..." : "Select Player"}
+            {playersLoading ? "Loading players..." : "Choose a player"}
           </option>
           {players.map((player) => (
             <option key={player.playerId} value={player.playerId}>
@@ -355,356 +357,455 @@ const GameStatsForm: React.FC = () => {
               {player.position ? ` - ${player.position}` : ""}
             </option>
           ))}
-        </select>
-      </div>
+       </select>
 
-      <div>
-        <input
-          className="items-stretch w-full"
-          type="text"
-          placeholder="Opponent"
-          value={playerGame.team2}
-          onChange={(e) =>
-            setPlayerGame((pg) => ({ ...pg, team2: e.target.value }))
-          }
-        />
+{selectedPlayerId && (
+  <div className="selected-player-badge">
+    Tracking stats for{" "}
+    <strong>
+      {players.find((p) => p.playerId === selectedPlayerId)?.name}
+    </strong>
+    {players.find((p) => p.playerId === selectedPlayerId)?.number && (
+      <span className="player-number">
+        #{players.find((p) => p.playerId === selectedPlayerId)?.number}
+      </span>
+    )}
+  </div>
+)}
       </div>
+    </div>
 
-      <div className="flex row-container items-center gap-8">
-        <div className="labelContainer">
-          <h2 className="label">At Bats</h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({
-                ...gameStats,
-                atBats: Math.max(0, gameStats.atBats - 1),
-              })
-            }
-          >
-            <MinusIcon size={24} />
-          </button>
-          <span className="statInput">{gameStats.atBats}</span>
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({ ...gameStats, atBats: gameStats.atBats + 1 })
-            }
-          >
-            <PlusIcon size={24} />
-          </button>
-          <button
-            type="button"
-            className="iconButton-destructive"
-            onClick={() => setGameStats({ ...gameStats, atBats: 0 })}
-          >
-            <ArrowCounterClockwiseIcon size={24} />
-          </button>
-        </div>
-      </div>
+    <div className="form-group">
+      <label htmlFor="opponentName">Opponent</label>
+      <input
+        id="opponentName"
+        className="form-input opponent-input"
+        type="text"
+        placeholder="Enter opponent team name"
+        value={playerGame.team2}
+        onChange={(e) =>
+          setPlayerGame((pg) => ({ ...pg, team2: e.target.value }))
+        }
+      />
+    </div>
+  </div>
+</div>
 
-      <div className="row-container flex row items-center gap-8">
-        <div className="labelContainer">
-          <h2 className="label">Hits</h2>
-        </div>
-        <div className="flex row items-center gap-2">
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({
-                ...gameStats,
-                hits: Math.max(0, gameStats.hits - 1),
-              })
-            }
-          >
-            <MinusIcon size={24} />
-          </button>
-          <span className="statInput">{gameStats.hits}</span>
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({ ...gameStats, hits: gameStats.hits + 1 })
-            }
-          >
-            <PlusIcon size={24} />
-          </button>
-          <button
-            type="button"
-            className="iconButton-destructive"
-            onClick={() => setGameStats({ ...gameStats, hits: 0 })}
-          >
-            <ArrowCounterClockwiseIcon size={24} />
-          </button>
-        </div>
-      </div>
+<div className="stats-rows">
+  <div className="stat-row">
+    <div className="stat-left">At Bats</div>
+    <div className="stat-controls">
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            atBats: Math.max(0, gameStats.atBats - 1),
+          })
+        }
+      >
+        <MinusIcon size={18} />
+      </button>
 
-      <div className="row-container flex row items-center gap-8">
-        <div className="labelContainer">
-          <h2 className="label">Singles</h2>
-        </div>
-        <div className="flex row items-center gap-2">
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({
-                ...gameStats,
-                singles: Math.max(0, gameStats.singles - 1),
-              })
-            }
-          >
-            <MinusIcon size={24} />
-          </button>
-          <span className="statInput">{gameStats.singles}</span>
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({ ...gameStats, singles: gameStats.singles + 1 })
-            }
-          >
-            <PlusIcon size={24} />
-          </button>
-          <button
-            type="button"
-            className="iconButton-destructive"
-            onClick={() => setGameStats({ ...gameStats, singles: 0 })}
-          >
-            <ArrowCounterClockwiseIcon size={24} />
-          </button>
-        </div>
-      </div>
+      <div className="stat-value">{gameStats.atBats}</div>
 
-      <div className="row-container flex row items-center gap-8">
-        <div className="labelContainer">
-          <h2 className="label">Doubles</h2>
-        </div>
-        <div className="flex row items-center gap-2">
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({
-                ...gameStats,
-                doubles: Math.max(0, gameStats.doubles - 1),
-              })
-            }
-          >
-            <MinusIcon size={24} />
-          </button>
-          <span className="statInput">{gameStats.doubles}</span>
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({ ...gameStats, doubles: gameStats.doubles + 1 })
-            }
-          >
-            <PlusIcon size={24} />
-          </button>
-          <button
-            type="button"
-            className="iconButton-destructive"
-            onClick={() => setGameStats({ ...gameStats, doubles: 0 })}
-          >
-            <ArrowCounterClockwiseIcon size={24} />
-          </button>
-        </div>
-      </div>
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            atBats: gameStats.atBats + 1,
+          })
+        }
+      >
+        <PlusIcon size={18} />
+      </button>
 
-      <div className="row-container flex row items-center gap-8">
-        <div className="labelContainer">
-          <h2 className="label">Triples</h2>
-        </div>
-        <div className="flex row items-center gap-2">
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({
-                ...gameStats,
-                triples: Math.max(0, gameStats.triples - 1),
-              })
-            }
-          >
-            <MinusIcon size={24} />
-          </button>
-          <span className="statInput">{gameStats.triples}</span>
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({ ...gameStats, triples: gameStats.triples + 1 })
-            }
-          >
-            <PlusIcon size={24} />
-          </button>
-          <button
-            type="button"
-            className="iconButton-destructive"
-            onClick={() => setGameStats({ ...gameStats, triples: 0 })}
-          >
-            <ArrowCounterClockwiseIcon size={24} />
-          </button>
-        </div>
-      </div>
+      <button
+        type="button"
+        className="stat-btn stat-reset"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            atBats: 0,
+          })
+        }
+      >
+        <ArrowCounterClockwiseIcon size={18} />
+      </button>
+    </div>
+  </div>
 
-      <div className="row-container flex row items-center gap-8">
-        <div className="labelContainer">
-          <h2 className="label">Home Runs</h2>
-        </div>
-        <div className="flex row items-center gap-2">
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({
-                ...gameStats,
-                homeRuns: Math.max(0, gameStats.homeRuns - 1),
-              })
-            }
-          >
-            <MinusIcon size={24} />
-          </button>
-          <span className="statInput">{gameStats.homeRuns}</span>
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({ ...gameStats, homeRuns: gameStats.homeRuns + 1 })
-            }
-          >
-            <PlusIcon size={24} />
-          </button>
-          <button
-            type="button"
-            className="iconButton-destructive"
-            onClick={() => setGameStats({ ...gameStats, homeRuns: 0 })}
-          >
-            <ArrowCounterClockwiseIcon size={24} />
-          </button>
-        </div>
-      </div>
+  <div className="stat-row">
+    <div className="stat-left">Hits</div>
+    <div className="stat-controls">
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            hits: Math.max(0, gameStats.hits - 1),
+          })
+        }
+      >
+        <MinusIcon size={18} />
+      </button>
 
-      <div className="row-container flex row items-center gap-8">
-        <div className="labelContainer">
-          <h2 className="label">RBI</h2>
-        </div>
-        <div className="flex row items-center gap-2">
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({
-                ...gameStats,
-                rbi: Math.max(0, gameStats.rbi - 1),
-              })
-            }
-          >
-            <MinusIcon size={24} />
-          </button>
-          <span className="statInput">{gameStats.rbi}</span>
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({ ...gameStats, rbi: gameStats.rbi + 1 })
-            }
-          >
-            <PlusIcon size={24} />
-          </button>
-          <button
-            type="button"
-            className="iconButton-destructive"
-            onClick={() => setGameStats({ ...gameStats, rbi: 0 })}
-          >
-            <ArrowCounterClockwiseIcon size={24} />
-          </button>
-        </div>
-      </div>
+      <div className="stat-value">{gameStats.hits}</div>
 
-      <div className="row-container flex row items-center gap-8">
-        <div className="labelContainer">
-          <h2 className="label">Walks</h2>
-        </div>
-        <div className="flex row items-center gap-2">
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({
-                ...gameStats,
-                walks: Math.max(0, gameStats.walks - 1),
-              })
-            }
-          >
-            <MinusIcon size={24} />
-          </button>
-          <span className="statInput">{gameStats.walks}</span>
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({ ...gameStats, walks: gameStats.walks + 1 })
-            }
-          >
-            <PlusIcon size={24} />
-          </button>
-          <button
-            type="button"
-            className="iconButton-destructive"
-            onClick={() => setGameStats({ ...gameStats, walks: 0 })}
-          >
-            <ArrowCounterClockwiseIcon size={24} />
-          </button>
-        </div>
-      </div>
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            hits: gameStats.hits + 1,
+          })
+        }
+      >
+        <PlusIcon size={18} />
+      </button>
 
-      <div className="row-container flex row items-center gap-8">
-        <div className="labelContainer">
-          <h2 className="label">Strike Outs</h2>
-        </div>
-        <div className="flex row items-center gap-2">
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({
-                ...gameStats,
-                strikeOuts: Math.max(0, gameStats.strikeOuts - 1),
-              })
-            }
-          >
-            <MinusIcon size={24} />
-          </button>
-          <span className="statInput">{gameStats.strikeOuts}</span>
-          <button
-            type="button"
-            className="iconButton"
-            onClick={() =>
-              setGameStats({
-                ...gameStats,
-                strikeOuts: gameStats.strikeOuts + 1,
-              })
-            }
-          >
-            <PlusIcon size={24} />
-          </button>
-          <button
-            type="button"
-            className="iconButton-destructive"
-            onClick={() => setGameStats({ ...gameStats, strikeOuts: 0 })}
-          >
-            <ArrowCounterClockwiseIcon size={24} />
-          </button>
-        </div>
-      </div>
+      <button
+        type="button"
+        className="stat-btn stat-reset"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            hits: 0,
+          })
+        }
+      >
+        <ArrowCounterClockwiseIcon size={18} />
+      </button>
+    </div>
+  </div>
+
+  <div className="stat-row">
+    <div className="stat-left">Singles</div>
+    <div className="stat-controls">
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            singles: Math.max(0, gameStats.singles - 1),
+          })
+        }
+      >
+        <MinusIcon size={18} />
+      </button>
+
+      <div className="stat-value">{gameStats.singles}</div>
+
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            singles: gameStats.singles + 1,
+          })
+        }
+      >
+        <PlusIcon size={18} />
+      </button>
+
+      <button
+        type="button"
+        className="stat-btn stat-reset"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            singles: 0,
+          })
+        }
+      >
+        <ArrowCounterClockwiseIcon size={18} />
+      </button>
+    </div>
+  </div>
+
+  <div className="stat-row">
+    <div className="stat-left">Doubles</div>
+    <div className="stat-controls">
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            doubles: Math.max(0, gameStats.doubles - 1),
+          })
+        }
+      >
+        <MinusIcon size={18} />
+      </button>
+
+      <div className="stat-value">{gameStats.doubles}</div>
+
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            doubles: gameStats.doubles + 1,
+          })
+        }
+      >
+        <PlusIcon size={18} />
+      </button>
+
+      <button
+        type="button"
+        className="stat-btn stat-reset"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            doubles: 0,
+          })
+        }
+      >
+        <ArrowCounterClockwiseIcon size={18} />
+      </button>
+    </div>
+  </div>
+
+  <div className="stat-row">
+    <div className="stat-left">Triples</div>
+    <div className="stat-controls">
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            triples: Math.max(0, gameStats.triples - 1),
+          })
+        }
+      >
+        <MinusIcon size={18} />
+      </button>
+
+      <div className="stat-value">{gameStats.triples}</div>
+
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            triples: gameStats.triples + 1,
+          })
+        }
+      >
+        <PlusIcon size={18} />
+      </button>
+
+      <button
+        type="button"
+        className="stat-btn stat-reset"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            triples: 0,
+          })
+        }
+      >
+        <ArrowCounterClockwiseIcon size={18} />
+      </button>
+    </div>
+  </div>
+
+  <div className="stat-row">
+    <div className="stat-left">Home Runs</div>
+    <div className="stat-controls">
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            homeRuns: Math.max(0, gameStats.homeRuns - 1),
+          })
+        }
+      >
+        <MinusIcon size={18} />
+      </button>
+
+      <div className="stat-value">{gameStats.homeRuns}</div>
+
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            homeRuns: gameStats.homeRuns + 1,
+          })
+        }
+      >
+        <PlusIcon size={18} />
+      </button>
+
+      <button
+        type="button"
+        className="stat-btn stat-reset"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            homeRuns: 0,
+          })
+        }
+      >
+        <ArrowCounterClockwiseIcon size={18} />
+      </button>
+    </div>
+  </div>
+
+  <div className="stat-row">
+    <div className="stat-left">RBI</div>
+    <div className="stat-controls">
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            rbi: Math.max(0, gameStats.rbi - 1),
+          })
+        }
+      >
+        <MinusIcon size={18} />
+      </button>
+
+      <div className="stat-value">{gameStats.rbi}</div>
+
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            rbi: gameStats.rbi + 1,
+          })
+        }
+      >
+        <PlusIcon size={18} />
+      </button>
+
+      <button
+        type="button"
+        className="stat-btn stat-reset"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            rbi: 0,
+          })
+        }
+      >
+        <ArrowCounterClockwiseIcon size={18} />
+      </button>
+    </div>
+  </div>
+
+  <div className="stat-row">
+    <div className="stat-left">Walks</div>
+    <div className="stat-controls">
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            walks: Math.max(0, gameStats.walks - 1),
+          })
+        }
+      >
+        <MinusIcon size={18} />
+      </button>
+
+      <div className="stat-value">{gameStats.walks}</div>
+
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            walks: gameStats.walks + 1,
+          })
+        }
+      >
+        <PlusIcon size={18} />
+      </button>
+
+      <button
+        type="button"
+        className="stat-btn stat-reset"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            walks: 0,
+          })
+        }
+      >
+        <ArrowCounterClockwiseIcon size={18} />
+      </button>
+    </div>
+  </div>
+
+  <div className="stat-row">
+    <div className="stat-left">Strike Outs</div>
+    <div className="stat-controls">
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            strikeOuts: Math.max(0, gameStats.strikeOuts - 1),
+          })
+        }
+      >
+        <MinusIcon size={18} />
+      </button>
+
+      <div className="stat-value">{gameStats.strikeOuts}</div>
+
+      <button
+        type="button"
+        className="stat-btn"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            strikeOuts: gameStats.strikeOuts + 1,
+          })
+        }
+      >
+        <PlusIcon size={18} />
+      </button>
+
+      <button
+        type="button"
+        className="stat-btn stat-reset"
+        onClick={() =>
+          setGameStats({
+            ...gameStats,
+            strikeOuts: 0,
+          })
+        }
+      >
+        <ArrowCounterClockwiseIcon size={18} />
+      </button>
+    </div>
+  </div>
+</div>
 
       <div className="relative mt-4 flex gap-3">
         <button className="buttonPrimary" onClick={saveToBackend}>

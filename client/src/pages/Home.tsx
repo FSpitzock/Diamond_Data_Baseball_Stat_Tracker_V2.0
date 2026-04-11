@@ -11,7 +11,7 @@ import {
   TableCell,
   TableCaption,
 } from "../components/ui/table";
-import TeamLogo from "../assets/outlaws-logo.png"; 
+import logo from "../assets/outlaws-logo.png"; 
 
 type StatValues = {
   atBats: number;
@@ -216,7 +216,7 @@ const Home: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center justify-center gap-4">
               <img
-                src={TeamLogo}
+                src={logo}
                 alt="Oviedo Outlaws 9U"
                 className="w-16 h-16 rounded-lg border bg-white p-1 shadow-sm"
               />
