@@ -709,3 +709,343 @@ h3 { @apply
     height: 70px;
   }
 }
+
+.stats-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.stats-hero {
+  margin-bottom: 1.5rem;
+}
+
+.stats-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 2rem;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+.stats-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.stats-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.stats-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.stat-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.stat-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.stat-btn {
+  width: 46px;
+  height: 46px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background: #ffffff;
+  font-size: 1.5rem;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.stat-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 14px rgba(15, 23, 42, 0.08);
+}
+
+.stat-value {
+  min-width: 84px;
+  height: 46px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.stat-reset {
+  width: 42px;
+  height: 42px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+
+.stats-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+.stats-hero {
+  margin-bottom: 1.5rem;
+}
+
+.stats-hero h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.stats-card {
+  width: 100%;
+  max-width: 900px;
+  padding: 2rem;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+@media (max-width: 768px) {
+  .stats-page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .stats-hero h1 {
+    font-size: 1.45rem;
+  }
+
+  .stats-card {
+    padding: 1.25rem;
+    border-radius: 18px;
+  }
+}
+
+.stats-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.65rem 0.85rem;
+  border-radius: 14px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.stat-left {
+  font-weight: 600;
+  color: #111827;
+  font-size: 0.95rem;
+}
+
+.stat-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.stat-value {
+  width: 60px;
+  height: 36px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.stat-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: white;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.stat-btn:hover {
+  background: #f1f5f9;
+}
+
+.stat-reset {
+  color: #6b7280;
+}
+
+.stats-hero {
+  margin-bottom: 1.5rem;
+}
+
+.stats-hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.stats-team-logo {
+  width: 78px;
+  height: 78px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.stats-hero-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-hero h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.stats-card {
+  width: 100%;
+  max-width: 900px;
+  padding: 2rem;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+}
+
+@media (max-width: 768px) {
+  .stats-hero-brand {
+    align-items: flex-start;
+    gap: 0.85rem;
+  }
+
+  .stats-team-logo {
+    width: 62px;
+    height: 62px;
+  }
+
+  .stats-hero h1 {
+    font-size: 1.35rem;
+  }
+}
+
+.stats-card .player-form,
+.stats-card .counter {
+  margin-top: 0;
+}
+
+.game-setup {
+  margin-bottom: 1.5rem;
+  padding: 1.1rem;
+  border-radius: 18px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.game-setup-header {
+  margin-bottom: 1rem;
+}
+
+.game-setup-eyebrow {
+  margin: 0 0 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #2563eb;
+}
+
+.game-setup-header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.game-setup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.select-wrap {
+  position: relative;
+}
+
+.setup-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 3rem;
+  cursor: pointer;
+  background: #ffffff;
+}
+
+.select-wrap::after {
+  content: "⌄";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-52%);
+  font-size: 1.1rem;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.opponent-input {
+  background: #ffffff;
+}
+
+.setup-select:focus,
+.opponent-input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+@media (max-width: 768px) {
+  .game-setup-grid {
+    grid-template-columns: 1fr;
+  }
+}
