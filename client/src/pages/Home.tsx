@@ -12,7 +12,6 @@ import {
   TableCaption,
 } from "../components/ui/table";
 import StatsCard from "@/components/ui/statsCard";
-import AddPlayerForm from "../components/Forms/AddPlayerForm";
 
 type StatValues = {
   atBats: number;
@@ -104,7 +103,7 @@ const DELETE_PLAYER = gql`
 const Home: React.FC = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
   const navigate = useNavigate();
-  const [editingPlayer, setEditingPlayer] = useState<PlayerRecord | null>(null);
+  
 
   const [deletePlayerGame] = useMutation(DELETE_PLAYER_GAME, {
     refetchQueries: [{ query: GET_HOME_DATA }],
@@ -178,9 +177,6 @@ const Home: React.FC = () => {
         setSelectedPlayerId("");
       }
 
-      if (editingPlayer?.playerId === playerId) {
-        setEditingPlayer(null);
-      }
     } catch (error) {
       console.error("Failed to delete player:", error);
     }
@@ -219,10 +215,7 @@ const Home: React.FC = () => {
   if (loading) {
     return (
       <section className="flex flex-col gap-8">
-        <AddPlayerForm
-          editingPlayer={editingPlayer}
-          onCancelEdit={() => setEditingPlayer(null)}
-        />
+
         <p className="p-6 text-xl">Loading home page...</p>
       </section>
     );
@@ -232,10 +225,7 @@ const Home: React.FC = () => {
     console.error("Failed to load home data:", error);
     return (
       <section className="flex flex-col gap-8">
-        <AddPlayerForm
-          editingPlayer={editingPlayer}
-          onCancelEdit={() => setEditingPlayer(null)}
-        />
+
         <p className="p-6 text-xl">Error loading home page.</p>
       </section>
     );
@@ -243,11 +233,7 @@ const Home: React.FC = () => {
 
   return (
     <section className="flex flex-col gap-8">
-      <AddPlayerForm
-        editingPlayer={editingPlayer}
-        onCancelEdit={() => setEditingPlayer(null)}
-      />
-
+     
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>

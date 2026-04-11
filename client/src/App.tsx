@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import Stats from "./pages/Stats";
+import AddPlayer from "./pages/AddPlayer"; 
 import BaseballAI from "./pages/BaseballAI";
 import BaseballCard from "./pages/BaseballCard";
 import NotFound from "./pages/NotFound";
@@ -47,6 +48,7 @@ const App: React.FC = () => {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/" element={<Home />} />
+          <Route path="/AddPlayer" element={<AddPlayer />} />
           <Route path="/Stats" element={<Stats />} />
           <Route path="/BaseballAI" element={<BaseballAI />} />
           <Route path="/BaseballCard" element={<BaseballCard />} />

@@ -23,6 +23,15 @@ const Header: FC = () => {
             Home
           </NavLink>
 
+           <NavLink
+            to="/AddPlayer"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            Add Player
+          </NavLink>
+
           <NavLink
             to="/Stats"
             className={({ isActive }) =>
