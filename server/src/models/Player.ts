@@ -22,6 +22,11 @@ const playerSchema: Schema<IPlayer> = new Schema(
       default: "",
       trim: true,
     },
+     image: {
+    type: String,
+    default: "",
+    trim: true,
+  },
   },
   {
     timestamps: true,
