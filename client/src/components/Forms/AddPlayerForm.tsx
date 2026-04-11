@@ -9,6 +9,7 @@ const GET_HOME_DATA = gql`
       name
       number
       position
+      image
       games {
         gameId
       }
@@ -23,6 +24,7 @@ const GET_HOME_DATA = gql`
         name
         number
         position
+        image
       }
       stats {
         atBats
@@ -40,12 +42,23 @@ const GET_HOME_DATA = gql`
 `;
 
 const ADD_PLAYER = gql`
-  mutation AddPlayer($name: String!, $number: Int, $position: String, $image: String) {
-    addPlayer(name: $name, number: $number, position: $position, image: $image) {
+  mutation AddPlayer(
+    $name: String!
+    $number: Int
+    $position: String
+    $image: String
+  ) {
+    addPlayer(
+      name: $name
+      number: $number
+      position: $position
+      image: $image
+    ) {
       playerId
       name
       number
       position
+      image
     }
   }
 `;
@@ -56,7 +69,7 @@ const UPDATE_PLAYER = gql`
     $name: String!
     $number: Int
     $position: String
-    $image: String  
+    $image: String
   ) {
     updatePlayer(
       playerId: $playerId
@@ -64,7 +77,6 @@ const UPDATE_PLAYER = gql`
       number: $number
       position: $position
       image: $image
-
     ) {
       playerId
       name
@@ -108,6 +120,7 @@ type EditablePlayer = {
   name: string;
   number?: number | null;
   position?: string | null;
+  image?: string | null;
 } | null;
 
 type AddPlayerFormProps = {
@@ -140,23 +153,23 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
     awaitRefetchQueries: true,
   });
 
-  useEffect(() => {
-    if (editingPlayer) {
-      setName(editingPlayer.name || "");
-      setNumber(
-        editingPlayer.number !== null && editingPlayer.number !== undefined
-          ? String(editingPlayer.number)
-          : "",
-      );
-      setPosition(editingPlayer.position || "");
-      setImage((editingPlayer as any)?.image || ""); // <-- move here
-    } else {
-      setName("");
-      setNumber("");
-      setPosition("");
-      setImage(""); // <-- just clear it
-    }
-  }, [editingPlayer]);
+useEffect(() => {
+  if (editingPlayer) {
+    setName(editingPlayer.name || "");
+    setNumber(
+      editingPlayer.number !== null && editingPlayer.number !== undefined
+        ? String(editingPlayer.number)
+        : "",
+    );
+    setPosition(editingPlayer.position || "");
+    setImage(editingPlayer.image || "");
+  } else {
+    setName("");
+    setNumber("");
+    setPosition("");
+    setImage("");
+  }
+}, [editingPlayer]);
 
   const resetForm = () => {
     setName("");
