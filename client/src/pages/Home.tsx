@@ -211,23 +211,24 @@ const Home: React.FC = () => {
   }
 
   return (
-    <section className="flex flex-col gap-8">
-      <section className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center justify-center gap-4">
-              <img
-                src={logo}
-                alt="Oviedo Outlaws 9U"
-                className="w-16 h-16 rounded-lg border bg-white p-1 shadow-sm"
-              />
+ <section className="home-roster-section">
+  <section className="home-team-header">
+    <div className="home-team-header-row">
+      <div className="home-team-brand">
+        <img
+          src={logo}
+          alt="Oviedo Outlaws 9U"
+          className="home-team-logo"
+        />
 
-              <div className="text-left">
-                <h2 className="text-3xl font-bold">Oviedo Outlaws 9U</h2>
-                <p className="text-sm text-neutral-500">
-                  Team roster and player performance overview.
-                </p>
-              </div>
-            </div>
+        <div className="home-team-copy">
+          <p className="home-team-eyebrow">Team Roster</p>
+          <h2 className="home-team-title">Oviedo Outlaws 9U</h2>
+          <p className="home-team-subtitle">
+            Team roster and player performance overview.
+          </p>
+        </div>
+      </div>
 
           {selectedPlayerId && (
             <button
