@@ -11,7 +11,7 @@ import {
   TableCell,
   TableCaption,
 } from "../components/ui/table";
-import logo from "../assets/outlaws-logo.png"; 
+import logo from "../assets/outlaws-logo.png";
 
 type StatValues = {
   atBats: number;
@@ -30,6 +30,7 @@ type PlayerRecord = {
   name: string;
   number?: number | null;
   position?: string | null;
+  image?: string | null;
   games?: { gameId: string }[];
 };
 
@@ -53,6 +54,7 @@ const GET_HOME_DATA = gql`
       name
       number
       position
+      image
       games {
         gameId
       }
@@ -211,24 +213,24 @@ const Home: React.FC = () => {
   }
 
   return (
- <section className="home-roster-section">
-  <section className="home-team-header">
-    <div className="home-team-header-row">
-      <div className="home-team-brand">
-        <img
-          src={logo}
-          alt="Oviedo Outlaws 9U"
-          className="home-team-logo"
-        />
+    <section className="home-roster-section">
+      <section className="home-team-header">
+        <div className="home-team-header-row">
+          <div className="home-team-brand">
+            <img
+              src={logo}
+              alt="Oviedo Outlaws 9U"
+              className="home-team-logo"
+            />
 
-        <div className="home-team-copy">
-          <p className="home-team-eyebrow">Team Roster</p>
-          <h2 className="home-team-title">Oviedo Outlaws 9U</h2>
-          <p className="home-team-subtitle">
-            Team roster and player performance overview.
-          </p>
-        </div>
-      </div>
+            <div className="home-team-copy">
+              <p className="home-team-eyebrow">Team Roster</p>
+              <h2 className="home-team-title">Oviedo Outlaws 9U</h2>
+              <p className="home-team-subtitle">
+                Team roster and player performance overview.
+              </p>
+            </div>
+          </div>
 
           {selectedPlayerId && (
             <button
@@ -268,7 +270,21 @@ const Home: React.FC = () => {
                       className="cursor-pointer"
                       onClick={() => setSelectedPlayerId(player.playerId)}
                     >
-                      {player.name}
+                      <div className="flex items-center gap-3">
+                        {player.image ? (
+                          <img
+                            src={player.image}
+                            alt={player.name}
+                            className="w-10 h-10 rounded-md object-cover border"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-md border flex items-center justify-center text-xs">
+                            —
+                          </div>
+                        )}
+
+                        {player.name}
+                      </div>
                     </TableCell>
                     <TableCell
                       className="cursor-pointer"
