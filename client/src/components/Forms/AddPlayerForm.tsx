@@ -71,6 +71,14 @@ const UPDATE_PLAYER = gql`
   }
 `;
 
+const DELETE_PLAYER = gql`
+  mutation DeletePlayer($playerId: ID!) {
+    deletePlayer(playerId: $playerId) {
+      playerId
+    }
+  }
+`;
+
 const positionOptions = [
   "",
   "Pitcher",
@@ -118,6 +126,11 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
   });
 
   const [updatePlayer] = useMutation(UPDATE_PLAYER, {
+    refetchQueries: [{ query: GET_HOME_DATA }],
+    awaitRefetchQueries: true,
+  });
+
+  const [deletePlayer] = useMutation(DELETE_PLAYER, {
     refetchQueries: [{ query: GET_HOME_DATA }],
     awaitRefetchQueries: true,
   });
@@ -209,6 +222,43 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
     }
   };
 
+  const handleDeletePlayer = async () => {
+    if (!editingPlayer) return;
+
+    const confirmed = window.confirm(
+      `Delete ${editingPlayer.name}? This will also delete all saved games.`,
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deletePlayer({
+        variables: {
+          playerId: editingPlayer.playerId,
+        },
+      });
+
+      setNotification({
+        message: "🗑️ Player deleted successfully!",
+        type: "success",
+      });
+
+      setTimeout(() => {
+        resetForm();
+        onCancelEdit();
+      }, 1500);
+    } catch (error) {
+      console.error("Failed to delete player:", error);
+
+      setNotification({
+        message: "Failed to delete player.",
+        type: "error",
+      });
+
+      setTimeout(() => setNotification(null), 4000);
+    }
+  };
+
   return (
     <section className="counter">
       <header>
@@ -264,27 +314,35 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
           </button>
 
           {editingPlayer && (
-            <button
-              type="button"
-              className="iconButton-destructive"
-              onClick={() => {
-                resetForm();
-                onCancelEdit();
-              }}
-            >
-              Cancel Edit
-            </button>
+            <>
+              <button
+                type="button"
+                className="iconButton"
+                onClick={() => {
+                  resetForm();
+                  onCancelEdit();
+                }}
+              >
+                Cancel Edit
+              </button>
+
+              <button
+                type="button"
+                className="iconButton-destructive"
+                onClick={handleDeletePlayer}
+              >
+                Delete Player
+              </button>
+            </>
           )}
 
           {notification && (
             <div
               className={`absolute top-[-3rem] left-1/2 transform -translate-x-1/2
-                          px-4 py-2 rounded shadow-lg text-white font-semibold
-                          transition-all duration-300 ${
-                            notification.type === "success"
-                              ? "bg-green-500"
-                              : "bg-red-500"
-                          }`}
+      px-4 py-2 rounded shadow-lg text-white font-semibold
+      transition-all duration-300 ${
+        notification.type === "success" ? "bg-green-500" : "bg-red-500"
+      }`}
             >
               {notification.message}
             </div>

@@ -103,14 +103,8 @@ const DELETE_PLAYER = gql`
 const Home: React.FC = () => {
   const [selectedPlayerId, setSelectedPlayerId] = useState<string>("");
   const navigate = useNavigate();
-  
 
   const [deletePlayerGame] = useMutation(DELETE_PLAYER_GAME, {
-    refetchQueries: [{ query: GET_HOME_DATA }],
-    awaitRefetchQueries: true,
-  });
-
-  const [deletePlayer] = useMutation(DELETE_PLAYER, {
     refetchQueries: [{ query: GET_HOME_DATA }],
     awaitRefetchQueries: true,
   });
@@ -161,25 +155,12 @@ const Home: React.FC = () => {
     }
   };
 
-  const handleDeletePlayer = async (playerId: string, playerName: string) => {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete ${playerName}? This will also delete all of their saved games.`,
-    );
-
-    if (!confirmed) return;
-
-    try {
-      await deletePlayer({
-        variables: { playerId },
-      });
-
-      if (selectedPlayerId === playerId) {
-        setSelectedPlayerId("");
-      }
-
-    } catch (error) {
-      console.error("Failed to delete player:", error);
-    }
+  const handleEditPlayer = (player: PlayerRecord) => {
+    navigate("/add-player", {
+      state: {
+        editingPlayer: player,
+      },
+    });
   };
 
   const handleEdit = (game: PlayerGameRecord) => {
@@ -215,7 +196,6 @@ const Home: React.FC = () => {
   if (loading) {
     return (
       <section className="flex flex-col gap-8">
-
         <p className="p-6 text-xl">Loading home page...</p>
       </section>
     );
@@ -225,7 +205,6 @@ const Home: React.FC = () => {
     console.error("Failed to load home data:", error);
     return (
       <section className="flex flex-col gap-8">
-
         <p className="p-6 text-xl">Error loading home page.</p>
       </section>
     );
@@ -233,7 +212,6 @@ const Home: React.FC = () => {
 
   return (
     <section className="flex flex-col gap-8">
-     
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <div>
@@ -305,18 +283,9 @@ const Home: React.FC = () => {
                       <div className="flex gap-2">
                         <button
                           className="iconButton"
-                          onClick={() => setEditingPlayer(player)}
+                          onClick={() => handleEditPlayer(player)}
                         >
                           Edit
-                        </button>
-
-                        <button
-                          className="iconButton-destructive"
-                          onClick={() =>
-                            handleDeletePlayer(player.playerId, player.name)
-                          }
-                        >
-                          Delete
                         </button>
                       </div>
                     </TableCell>
