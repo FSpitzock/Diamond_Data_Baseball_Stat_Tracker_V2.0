@@ -242,7 +242,7 @@ const Home: React.FC = () => {
         {!players.length ? (
           <p className="p-4 text-lg">No players added yet.</p>
         ) : (
-          <Table>
+          <Table className="roster-table">
             <TableCaption>Your current team roster</TableCaption>
             <TableHeader>
               <TableRow>
