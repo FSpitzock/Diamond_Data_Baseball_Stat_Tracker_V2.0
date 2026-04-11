@@ -490,18 +490,19 @@ h3 { @apply
 }
 
 .page-eyebrow {
-  margin: 0 0 0.4rem;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.50rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   color: #2563eb;
+  margin-bottom: 0.2rem;
 }
 
 .add-player-hero h1 {
-  margin: 0 0 0.5rem;
-  font-size: 2rem;
-  font-weight: 700;
+  margin: 0 0 0.4rem;
+  font-size: 1.5rem;
+  font-weight: 600;
   color: #111827;
 }
 
