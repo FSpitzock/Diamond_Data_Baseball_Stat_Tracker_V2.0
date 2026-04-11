@@ -16,25 +16,35 @@ const AddPlayer: React.FC = () => {
 
   const editingPlayer = location.state?.editingPlayer as PlayerRecord | null;
 
-  return (
-    <main className="page-container">
-      <section className="page-header">
-        <h1>{editingPlayer ? "Edit Player" : "Add Player"}</h1>
-        <p>
-          {editingPlayer
-            ? "Update this player’s information."
-            : "Create a player before adding game stats."}
-        </p>
-      </section>
+return (
+  <main className="page-container add-player-page">
+    <section className="add-player-hero">
 
-      <section className="section-card form-card">
-        <AddPlayerForm
-          editingPlayer={editingPlayer}
-          onCancelEdit={() => navigate("/")}
-        />
-      </section>
-    </main>
-  );
+      <img
+        src="/outlaws-logo.png"
+        alt="Oviedo Outlaws"
+        className="team-logo"
+      />
+
+      <p className="page-eyebrow">Oviedo Outlaws 9U</p>
+
+      <h1>{editingPlayer ? "Edit Player" : "Add Player"}</h1>
+
+      <p className="page-description">
+        {editingPlayer
+          ? "Update this player’s information and keep your roster current."
+          : "Create a player profile before adding game stats and tracking performance."}
+      </p>
+    </section>
+
+    <section className="section-card form-card add-player-card">
+      <AddPlayerForm
+        editingPlayer={editingPlayer}
+        onCancelEdit={() => navigate("/")}
+      />
+    </section>
+  </main>
+);
 };
 
 export default AddPlayer;

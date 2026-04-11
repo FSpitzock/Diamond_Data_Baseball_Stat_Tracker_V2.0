@@ -158,15 +158,20 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
     setNotification(null);
   };
 
+  const showNotification = (
+    message: string,
+    type: "success" | "error",
+    duration = 3000,
+  ) => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), duration);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!name.trim()) {
-      setNotification({
-        message: "Player name is required.",
-        type: "error",
-      });
-      setTimeout(() => setNotification(null), 3000);
+      showNotification("Player name is required.", "error");
       return;
     }
 
@@ -181,10 +186,7 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
           },
         });
 
-        setNotification({
-          message: "✏️ Player updated successfully!",
-          type: "success",
-        });
+        showNotification("✏️ Player updated successfully!", "success", 2000);
 
         setTimeout(() => {
           resetForm();
@@ -202,23 +204,15 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
         },
       });
 
-      setNotification({
-        message: "✅ Player added successfully!",
-        type: "success",
-      });
-
+      showNotification("✅ Player added successfully!", "success");
       resetForm();
-
-      setTimeout(() => setNotification(null), 3000);
     } catch (error) {
       console.error("Failed to save player:", error);
-
-      setNotification({
-        message: "Failed to save player. Check console for details.",
-        type: "error",
-      });
-
-      setTimeout(() => setNotification(null), 5000);
+      showNotification(
+        "Failed to save player. Check console for details.",
+        "error",
+        5000,
+      );
     }
   };
 
@@ -238,10 +232,7 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
         },
       });
 
-      setNotification({
-        message: "🗑️ Player deleted successfully!",
-        type: "success",
-      });
+      showNotification("🗑️ Player deleted successfully!", "success", 1500);
 
       setTimeout(() => {
         resetForm();
@@ -249,45 +240,57 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
       }, 1500);
     } catch (error) {
       console.error("Failed to delete player:", error);
-
-      setNotification({
-        message: "Failed to delete player.",
-        type: "error",
-      });
-
-      setTimeout(() => setNotification(null), 4000);
+      showNotification("Failed to delete player.", "error", 4000);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <div>
+    <form onSubmit={handleSubmit} className="player-form">
+      {notification && (
+        <div
+          className={`form-notification ${
+            notification.type === "success"
+              ? "form-notification-success"
+              : "form-notification-error"
+          }`}
+        >
+          {notification.message}
+        </div>
+      )}
+
+      <div className="form-group">
+        <label htmlFor="playerName">Player Name</label>
         <input
-          className="items-stretch w-full"
+          id="playerName"
+          className="form-input"
           type="text"
-          placeholder="Player Name"
+          placeholder="Enter player name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
       </div>
 
-      <div>
+      <div className="form-group">
+        <label htmlFor="jerseyNumber">Jersey Number</label>
         <input
-          className="items-stretch w-full"
+          id="jerseyNumber"
+          className="form-input"
           type="number"
-          placeholder="Jersey Number"
+          placeholder="Enter jersey number"
           value={number}
           onChange={(e) => setNumber(e.target.value)}
         />
       </div>
 
-      <div>
+      <div className="form-group">
+        <label htmlFor="position">Position</label>
         <select
-          className="items-stretch w-full"
+          id="position"
+          className="form-input"
           value={position}
           onChange={(e) => setPosition(e.target.value)}
         >
-          <option value="">Select Position</option>
+          <option value="">Select position</option>
           {positionOptions
             .filter((p) => p !== "")
             .map((pos) => (
@@ -298,7 +301,7 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
         </select>
       </div>
 
-      <div className="relative mt-2 flex gap-3">
+      <div className="form-actions">
         <button type="submit" className="buttonPrimary">
           {editingPlayer ? "Update Player" : "Add Player"}
         </button>
@@ -307,7 +310,7 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
           <>
             <button
               type="button"
-              className="iconButton"
+              className="buttonSecondary"
               onClick={() => {
                 resetForm();
                 onCancelEdit();
@@ -318,24 +321,12 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
 
             <button
               type="button"
-              className="iconButton-destructive"
+              className="buttonDanger"
               onClick={handleDeletePlayer}
             >
               Delete Player
             </button>
           </>
-        )}
-
-        {notification && (
-          <div
-            className={`absolute top-[-3rem] left-1/2 transform -translate-x-1/2
-      px-4 py-2 rounded shadow-lg text-white font-semibold
-      transition-all duration-300 ${
-        notification.type === "success" ? "bg-green-500" : "bg-red-500"
-      }`}
-          >
-            {notification.message}
-          </div>
         )}
       </div>
     </form>
