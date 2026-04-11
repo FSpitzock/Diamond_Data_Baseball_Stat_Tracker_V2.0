@@ -40,8 +40,8 @@ const GET_HOME_DATA = gql`
 `;
 
 const ADD_PLAYER = gql`
-  mutation AddPlayer($name: String!, $number: Int, $position: String) {
-    addPlayer(name: $name, number: $number, position: $position) {
+  mutation AddPlayer($name: String!, $number: Int, $position: String, $image: String) {
+    addPlayer(name: $name, number: $number, position: $position, image: $image) {
       playerId
       name
       number
@@ -56,17 +56,21 @@ const UPDATE_PLAYER = gql`
     $name: String!
     $number: Int
     $position: String
+    $image: String  
   ) {
     updatePlayer(
       playerId: $playerId
       name: $name
       number: $number
       position: $position
+      image: $image
+
     ) {
       playerId
       name
       number
       position
+      image
     }
   }
 `;
@@ -118,6 +122,7 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
   const [position, setPosition] = useState("");
+  const [image, setImage] = useState("");
   const [notification, setNotification] = useState<Notification | null>(null);
 
   const [addPlayer] = useMutation(ADD_PLAYER, {
@@ -144,10 +149,12 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
           : "",
       );
       setPosition(editingPlayer.position || "");
+      setImage((editingPlayer as any)?.image || ""); // <-- move here
     } else {
       setName("");
       setNumber("");
       setPosition("");
+      setImage(""); // <-- just clear it
     }
   }, [editingPlayer]);
 
@@ -155,6 +162,7 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
     setName("");
     setNumber("");
     setPosition("");
+    setImage("");
     setNotification(null);
   };
 
@@ -183,6 +191,7 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
             name: name.trim(),
             number: number.trim() ? parseInt(number, 10) : null,
             position: position.trim(),
+            image: image.trim(),
           },
         });
 
@@ -196,13 +205,14 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
         return;
       }
 
-      await addPlayer({
-        variables: {
-          name: name.trim(),
-          number: number.trim() ? parseInt(number, 10) : null,
-          position: position.trim(),
-        },
-      });
+await addPlayer({
+  variables: {
+    name: name.trim(),
+    number: number.trim() ? parseInt(number, 10) : null,
+    position: position.trim(),
+    image: image.trim(),
+  },
+});
 
       showNotification("✅ Player added successfully!", "success");
       resetForm();
@@ -300,6 +310,48 @@ const AddPlayerForm: React.FC<AddPlayerFormProps> = ({
             ))}
         </select>
       </div>
+
+      <div className="form-group">
+  <label htmlFor="playerImage">Player Photo</label>
+  <input
+    id="playerImage"
+    className="form-input"
+    type="text"
+    placeholder="Paste image URL"
+    value={image}
+    onChange={(e) => setImage(e.target.value)}
+  />
+</div>
+
+<div className="form-group">
+  {image ? (
+    <img
+      src={image}
+      alt="Player preview"
+      style={{
+        width: "120px",
+        height: "120px",
+        objectFit: "cover",
+        borderRadius: "8px",
+        border: "1px solid #ccc"
+      }}
+    />
+  ) : (
+    <div
+      style={{
+        width: "120px",
+        height: "120px",
+        border: "1px solid #ccc",
+        borderRadius: "8px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}
+    >
+      No Photo
+    </div>
+  )}
+</div>
 
       <div className="form-actions">
         <button type="submit" className="buttonPrimary">
