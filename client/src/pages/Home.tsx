@@ -11,7 +11,7 @@ import {
   TableCell,
   TableCaption,
 } from "../components/ui/table";
-import TeamLogo from "../assets/outlaws-logo.jpg"; 
+import TeamLogo from "../assets/outlaws-logo.png"; 
 
 type StatValues = {
   atBats: number;
