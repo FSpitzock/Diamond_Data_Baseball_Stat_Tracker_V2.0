@@ -63,6 +63,14 @@ const typeDefs = gql`
   image: String
 ): Player
 
+updatePlayer(
+  playerId: ID!
+  name: String!
+  number: Int
+  position: String
+  image: String
+): Player
+
     addPlayerGame(
       playerId: ID!
       team1: String
