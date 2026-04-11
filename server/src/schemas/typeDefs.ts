@@ -56,13 +56,6 @@ const typeDefs = gql`
     addUser(username: String!, email: String!, password: String!): Auth
     login(email: String!, password: String!): Auth
 
-    addPlayer(
-  name: String!
-  number: Int
-  position: String
-  image: String
-): Player
-
   addPlayer(
   name: String!
   number: Int
