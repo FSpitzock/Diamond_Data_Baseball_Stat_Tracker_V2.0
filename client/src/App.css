@@ -22,14 +22,15 @@
     text-neutral-900
   }
   h2 { @apply
-    text-5xl
+    text-3xl
     text-neutral-900
     tracking-tight;
   } 
-  h3 { @apply
-    text-xs
-    text-blue-500;
-  }
+h3 { @apply
+  text-lg
+  font-semibold
+  text-neutral-900;
+}
   h4 { @apply
     text-xs
     text-neutral-500
@@ -126,7 +127,6 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
-  text-align: center;
 }
 
 .logo {
