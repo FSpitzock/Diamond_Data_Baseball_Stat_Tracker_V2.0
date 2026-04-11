@@ -41,16 +41,7 @@ const Header: FC = () => {
             Stats
           </NavLink>
 
-          <NavLink
-            to="/BaseballAI"
-            className={({ isActive }) =>
-              isActive ? "nav-link active" : "nav-link"
-            }
-          >
-            BaseballAI
-          </NavLink>
-
-          <NavLink
+            <NavLink
             to="/BaseballCard"
             className={({ isActive }) =>
               isActive ? "nav-link active" : "nav-link"
